@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run build --prefix sea-kart",
+  "buildCommand": "cd sea-kart && npm install && npm run build",
   "outputDirectory": "sea-kart/dist",
   "rewrites": [
     {
