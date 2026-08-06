@@ -1,27 +1,26 @@
 {
+  "id": "/",
   "short_name": "SeaKart",
   "name": "Sea Kart - Fresh Seafood Delivery",
   "description": "Order fresh seafood delivered cold & fast to your doorstep.",
   "icons": [
     {
-      "src": "/favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
     },
     {
-      "src": "/images/mackerel.png",
+      "src": "/icon-512.png",
       "type": "image/png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "/images/mackerel.png",
-      "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
   "start_url": "/",
   "background_color": "#0f172a",
   "theme_color": "#2563eb",
   "display": "standalone",
-  "orientation": "portrait"
+  "orientation": "portrait",
+  "categories": ["shopping", "food"]
 }
