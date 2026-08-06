@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Star, Loader2, MessageSquare } from 'lucide-react';
 
+import { getApiBase } from '@/config/api';
+
 interface ReviewSectionProps {
   productId: string;
   productName: string;
@@ -31,7 +33,7 @@ const ReviewSection = ({ productId, productName }: ReviewSectionProps) => {
     queryKey: ['reviews', productId],
     queryFn: async () => {
       const res = await fetch(
-        (import.meta.env.VITE_API_URL || '') + `/api/reviews/${productId}`
+        `${getApiBase()}/api/reviews/${productId}`
       );
       return res.json() as Promise<{
         reviews: any[];

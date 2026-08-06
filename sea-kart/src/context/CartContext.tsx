@@ -23,6 +23,8 @@ export interface Order {
   deliverySlot?: string;
 }
 
+import { getApiBase } from '../config/api';
+
 interface CartContextType {
   cart: CartItem[];
   orders: Order[];
@@ -49,7 +51,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (token) {
       const fetchOrders = () => {
-        fetch((import.meta.env.VITE_API_URL || '') + '/api/orders', {
+        fetch(`${getApiBase()}/api/orders`, {
           headers: { 'Authorization': `Bearer ${token}` }
         })
         .then(res => res.json())
@@ -168,7 +170,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     
     try {
       const total = "Market Price";
-      const res = await fetch((import.meta.env.VITE_API_URL || '') + '/api/orders', {
+      const res = await fetch(`${getApiBase()}/api/orders`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -189,7 +191,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const cancelOrder = async (orderId: string) => {
     if (!token) return;
     try {
-      const res = await fetch((import.meta.env.VITE_API_URL || '') + `/api/orders/${encodeURIComponent(orderId)}/cancel`, {
+      const res = await fetch(`${getApiBase()}/api/orders/${encodeURIComponent(orderId)}/cancel`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -215,7 +217,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }
     
     try {
-      const res = await fetch((import.meta.env.VITE_API_URL || '') + '/api/wishlist/toggle', {
+      const res = await fetch(`${getApiBase()}/api/wishlist/toggle`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

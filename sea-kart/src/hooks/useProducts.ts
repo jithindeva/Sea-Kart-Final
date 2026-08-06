@@ -1,9 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { Product, products as staticProducts } from '../data/products';
 
+import { getApiBase } from '../config/api';
+
 export const fetchProducts = async (): Promise<Product[]> => {
   try {
-    const response = await fetch((import.meta.env.VITE_API_URL || '') + '/api/products');
+    const response = await fetch(`${getApiBase()}/api/products`);
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }

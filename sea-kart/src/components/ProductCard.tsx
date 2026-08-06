@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { useQuery } from '@tanstack/react-query';
 import ReviewSection from './ReviewSection';
 
+import { getApiBase } from '@/config/api';
+
 interface ProductCardProps {
   product: Product;
 }
@@ -30,7 +32,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
     queryKey: ['reviews', product.id],
     queryFn: async () => {
       const res = await fetch(
-        (import.meta.env.VITE_API_URL || '') + `/api/reviews/${product.id}`
+        `${getApiBase()}/api/reviews/${product.id}`
       );
       return res.json() as Promise<{ average: string | null; count: number }>;
     },

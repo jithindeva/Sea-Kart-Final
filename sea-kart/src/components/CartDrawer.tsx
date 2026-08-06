@@ -16,6 +16,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useUser } from "@/context/UserContext";
 import DeliveryScheduler from "./DeliveryScheduler";
 
+import { getApiBase } from "@/config/api";
+
 interface CartDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -82,7 +84,7 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
     try {
       const amount = calculateTotal();
 
-      const res = await fetch((import.meta.env.VITE_API_URL || '') + '/api/payment/create-order', {
+      const res = await fetch(`${getApiBase()}/api/payment/create-order`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -113,7 +115,7 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
           try {
             setProcessingState('PROCESSING');
             const verifyRes = await fetch(
-              (import.meta.env.VITE_API_URL || '') + '/api/payment/verify',
+              `${getApiBase()}/api/payment/verify`,
               {
                 method: 'POST',
                 headers: {
