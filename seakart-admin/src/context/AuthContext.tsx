@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import { getApiBase } from '../config/api';
 
 interface AuthContextType {
   user: any;
@@ -32,7 +33,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const login = async (email: string, pass: string) => {
-    const apiBase = (import.meta.env as any).VITE_API_URL || 'http://localhost:5000';
+    const apiBase = getApiBase();
     const cleanEmail = email.trim().toLowerCase();
     const cleanPass = pass.trim();
     const res = await axios.post(`${apiBase}/api/admin/login`, { email: cleanEmail, password: cleanPass });

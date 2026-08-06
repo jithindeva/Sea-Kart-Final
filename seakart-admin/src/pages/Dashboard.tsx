@@ -6,11 +6,12 @@ import { Package, Users, ShoppingCart, LogOut, CheckCircle2, Trash2, Waves, Truc
 
 import ConfirmModal from '../components/ConfirmModal';
 
-const api = axios.create({
-  baseURL: 'http://localhost:5000/api',
-});
+import { getApiBase } from '../config/api';
+
+const api = axios.create();
 
 api.interceptors.request.use((config) => {
+  config.baseURL = `${getApiBase()}/api`;
   const token = localStorage.getItem('admin_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
