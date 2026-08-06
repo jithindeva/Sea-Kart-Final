@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "build": "npm run build --prefix sea-kart",
     "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix sea-kart -- --open\" \"npm run dev --prefix seakart-admin -- --open\"",
     "install:all": "npm install && npm install --prefix backend && npm install --prefix sea-kart && npm install --prefix seakart-admin"
   },
