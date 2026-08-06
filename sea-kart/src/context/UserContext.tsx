@@ -54,48 +54,71 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem('sk_user_profile', JSON.stringify(userData));
   };
 
+  const getApiBase = () => {
+    const envUrl = (import.meta.env as any).VITE_API_URL;
+    if (envUrl && envUrl.trim() !== '') return envUrl.trim().replace(/\/$/, '');
+    if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      return 'https://sea-kart-final.onrender.com';
+    }
+    return '';
+  };
+
+  const parseJsonResponse = async (res: Response) => {
+    const text = await res.text();
+    let data: any = {};
+    try {
+      data = text ? JSON.parse(text) : {};
+    } catch (e) {
+      if (!res.ok) {
+        throw new Error(`Server returned error (${res.status}). Render backend may be starting up, please try again in a moment.`);
+      }
+      throw new Error('Invalid JSON response from server.');
+    }
+    return data;
+  };
+
   const login = async (email: string, pass: string, phone: string = '') => {
     const cleanEmail = email.trim().toLowerCase();
-    const res = await fetch((import.meta.env.VITE_API_URL || '') + '/api/auth/login', {
+    const res = await fetch(`${getApiBase()}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: cleanEmail, password: pass.trim(), phone })
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
+    const data = await parseJsonResponse(res);
+    if (!res.ok) throw new Error(data.error || 'Login failed');
     saveAuth(data.token, data.user);
     toast.success("Logged in successfully!");
   };
 
   const register = async (name: string, email: string, pass: string, phone: string = '') => {
     const cleanEmail = email.trim().toLowerCase();
-    const res = await fetch((import.meta.env.VITE_API_URL || '') + '/api/auth/register', {
+    const res = await fetch(`${getApiBase()}/api/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: name.trim(), email: cleanEmail, password: pass.trim(), phone })
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
+    const data = await parseJsonResponse(res);
+    if (!res.ok) throw new Error(data.error || 'Registration failed');
     saveAuth(data.token, data.user);
     toast.success("Account created successfully!");
   };
 
   const googleLogin = async (email: string, phone: string = '') => {
     const cleanEmail = email.trim().toLowerCase();
-    const res = await fetch((import.meta.env.VITE_API_URL || '') + '/api/auth/google', {
+    const res = await fetch(`${getApiBase()}/api/auth/google`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: cleanEmail, phone })
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
+    const data = await parseJsonResponse(res);
+    if (!res.ok) throw new Error(data.error || 'Google login failed');
     saveAuth(data.token, data.user);
     toast.success("Logged in with Google!");
   };
 
   const updateUser = async (updates: Partial<UserProfile>) => {
     if (!token) return;
-    const res = await fetch((import.meta.env.VITE_API_URL || '') + '/api/auth/update', {
+    const res = await fetch(`${getApiBase()}/api/auth/update`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
@@ -103,9 +126,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       },
       body: JSON.stringify(updates)
     });
-    const data = await res.json();
+    const data = await parseJsonResponse(res);
     if (!res.ok) {
-      toast.error(data.error);
+      toast.error(data.error || 'Update failed');
       return;
     }
     setUser(data.user);
@@ -114,25 +137,25 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const forgotPassword = async (email: string) => {
-    const res = await fetch((import.meta.env.VITE_API_URL || '') + '/api/auth/forgot-password', {
+    const res = await fetch(`${getApiBase()}/api/auth/forgot-password`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email })
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
+    const data = await parseJsonResponse(res);
+    if (!res.ok) throw new Error(data.error || 'Password reset request failed');
     toast.success(data.message || "Reset link sent!");
-    return data.mockToken; // Using mock token for testing
+    return data.mockToken;
   };
 
   const resetPassword = async (token: string, newPassword: string) => {
-    const res = await fetch((import.meta.env.VITE_API_URL || '') + '/api/auth/reset-password', {
+    const res = await fetch(`${getApiBase()}/api/auth/reset-password`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token, newPassword })
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
+    const data = await parseJsonResponse(res);
+    if (!res.ok) throw new Error(data.error || 'Password reset failed');
     toast.success("Password reset successfully!");
   };
 
