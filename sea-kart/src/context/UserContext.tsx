@@ -77,9 +77,25 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     return data;
   };
 
+  const fetchWithTimeout = async (url: string, options: RequestInit = {}, timeoutMs = 12000) => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const res = await fetch(url, { ...options, signal: controller.signal });
+      clearTimeout(timeoutId);
+      return res;
+    } catch (err: any) {
+      clearTimeout(timeoutId);
+      if (err.name === 'AbortError') {
+        throw new Error("Cloud backend server is waking up. Please click again in a few seconds!");
+      }
+      throw err;
+    }
+  };
+
   const login = async (email: string, pass: string, phone: string = '') => {
     const cleanEmail = email.trim().toLowerCase();
-    const res = await fetch(`${getApiBase()}/api/auth/login`, {
+    const res = await fetchWithTimeout(`${getApiBase()}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: cleanEmail, password: pass.trim(), phone })
@@ -92,7 +108,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   const register = async (name: string, email: string, pass: string, phone: string = '') => {
     const cleanEmail = email.trim().toLowerCase();
-    const res = await fetch(`${getApiBase()}/api/auth/register`, {
+    const res = await fetchWithTimeout(`${getApiBase()}/api/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: name.trim(), email: cleanEmail, password: pass.trim(), phone })
@@ -105,7 +121,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   const googleLogin = async (email: string, phone: string = '') => {
     const cleanEmail = email.trim().toLowerCase();
-    const res = await fetch(`${getApiBase()}/api/auth/google`, {
+    const res = await fetchWithTimeout(`${getApiBase()}/api/auth/google`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: cleanEmail, phone })
@@ -118,7 +134,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   const updateUser = async (updates: Partial<UserProfile>) => {
     if (!token) return;
-    const res = await fetch(`${getApiBase()}/api/auth/update`, {
+    const res = await fetchWithTimeout(`${getApiBase()}/api/auth/update`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
@@ -137,7 +153,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const forgotPassword = async (email: string) => {
-    const res = await fetch(`${getApiBase()}/api/auth/forgot-password`, {
+    const res = await fetchWithTimeout(`${getApiBase()}/api/auth/forgot-password`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email })
@@ -149,7 +165,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const resetPassword = async (token: string, newPassword: string) => {
-    const res = await fetch(`${getApiBase()}/api/auth/reset-password`, {
+    const res = await fetchWithTimeout(`${getApiBase()}/api/auth/reset-password`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token, newPassword })
