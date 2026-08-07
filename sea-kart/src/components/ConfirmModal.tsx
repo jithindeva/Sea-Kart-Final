@@ -54,23 +54,23 @@ export default function ConfirmModal({
       left: 0,
       right: 0,
       bottom: 0,
-      width: '100vw',
-      height: '100vh',
-      zIndex: 9999,
-      background: 'rgba(15, 23, 42, 0.75)',
+      zIndex: 99999,
+      background: 'rgba(15, 23, 42, 0.80)',
       backdropFilter: 'blur(8px)',
       WebkitBackdropFilter: 'blur(8px)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       padding: '16px',
-      boxSizing: 'border-box',
-      overflowY: 'auto',
     }}>
       <style>{`
         @keyframes modalPop {
           from { opacity: 0; transform: scale(0.92) translateY(10px); }
-          to { opacity: 1; transform: scale(1) translateY(0); }
+          to   { opacity: 1; transform: scale(1)    translateY(0);    }
+        }
+        @keyframes rainbowSlide {
+          0%   { background-position: 0%   50%; }
+          100% { background-position: 300% 50%; }
         }
         .modal-card { animation: modalPop 0.22s ease-out both; }
       `}</style>
@@ -81,6 +81,7 @@ export default function ConfirmModal({
         textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
         position: 'relative', overflow: 'hidden'
       }}>
+
         {/* Animated Top Rainbow Bar */}
         <div style={{
           position: 'absolute', top: 0, left: 0, right: 0, height: '4px',
