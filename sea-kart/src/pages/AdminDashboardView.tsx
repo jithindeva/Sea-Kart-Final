@@ -89,7 +89,7 @@ export default function AdminDashboardView() {
   const { data: ordersResponse, isLoading: loadingOrders } = useQuery({
     queryKey: ['adminOrders', ordersPage],
     queryFn: async () => (await api.get(`/admin/orders?page=${ordersPage}&limit=10`)).data,
-    refetchInterval: 3000,
+    refetchInterval: 10000,
   });
   const orders = ordersResponse?.data;
   const ordersTotalPages = ordersResponse?.totalPages || 1;
