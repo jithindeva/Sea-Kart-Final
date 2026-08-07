@@ -367,7 +367,7 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
                   </div>
                 )}
 
-                {/* ── Payment options ── */}
+                {/* ── Payment option ── */}
                 <div className="px-6 pb-6 space-y-3 border-t border-slate-100 dark:border-slate-800 pt-4">
                   <Button
                     onClick={handleRazorpayPayment}
@@ -375,16 +375,7 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
                     className="w-full h-13 rounded-xl flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-base transition-all shadow-lg hover:shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Smartphone className="w-5 h-5" />
-                    Pay Online with Razorpay (Cards / UPI / NetBanking)
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => executeOrderPlacement('Cash on Delivery')}
-                    disabled={!selectedSlot || !deliveryAddress.trim()}
-                    className="w-full h-12 rounded-xl flex items-center justify-center gap-2 text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 font-bold"
-                  >
-                    <Banknote className="w-5 h-5" />
-                    Cash on Delivery (COD)
+                    Payment
                   </Button>
                   <Button
                     variant="ghost"
