@@ -159,7 +159,7 @@ export default function AdminDashboardView() {
   };
 
   return (
-    <div className="min-h-screen flex" style={{ background: colors.pageBg, transition: 'background 0.3s ease' }}>
+    <div className="min-h-screen flex admin-layout" style={{ background: colors.pageBg, transition: 'background 0.3s ease' }}>
       <style>{`
         @keyframes rainbowSlide {
           0% { background-position: 0% 0%; }
@@ -200,15 +200,17 @@ export default function AdminDashboardView() {
           }
           .admin-sidebar {
             width: 100% !important;
-            position: relative !important;
+            position: sticky !important;
+            top: 0 !important;
             height: auto !important;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important;
+            z-index: 100 !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
           }
           .admin-brand {
-            padding: 16px !important;
+            padding: 12px 16px !important;
           }
           .admin-nav-container {
-            padding: 8px 12px !important;
+            padding: 6px 12px !important;
           }
           .admin-nav-label {
             display: none !important;
@@ -222,23 +224,37 @@ export default function AdminDashboardView() {
           .nav-btn {
             width: auto !important;
             flex-shrink: 0 !important;
-            padding: 10px 14px !important;
+            padding: 8px 12px !important;
+            font-size: 13px !important;
           }
           .admin-user-box {
             display: none !important;
           }
           .admin-main-content {
             margin-left: 0 !important;
-            padding: 16px !important;
-            padding-top: 20px !important;
+            padding: 12px !important;
+            padding-top: 16px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
           }
           .stats-container {
             flex-wrap: wrap !important;
+            gap: 8px !important;
           }
           .card-stat {
-            flex: 1 1 calc(33% - 8px) !important;
-            min-width: 100px !important;
-            padding: 8px 12px !important;
+            flex: 1 1 calc(50% - 8px) !important;
+            min-width: 120px !important;
+            padding: 12px !important;
+          }
+          .table-responsive-wrapper {
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+            width: 100% !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .card-stat {
+            flex: 1 1 100% !important;
           }
         }
       `}</style>
