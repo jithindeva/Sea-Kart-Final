@@ -652,15 +652,16 @@ const razorpay = new Razorpay({
 app.post('/api/payment/create-order', authMiddleware, async (req: any, res: any) => {
   try {
     const { amount } = req.body;
+    const keyId = process.env.RAZORPAY_KEY_ID || 'rzp_test_TIDWCx3F9hY5RS';
     
     const options = {
-      amount: amount * 100, // amount in the smallest currency unit (paise)
+      amount: Math.round(amount * 100), // amount in paise
       currency: "INR",
       receipt: `rcpt_${Math.floor(Math.random() * 10000)}`
     };
     
     const order = await razorpay.orders.create(options);
-    res.json(order);
+    res.json({ ...order, key: keyId });
   } catch (error) {
     console.error("Razorpay order creation failed:", error);
     res.status(500).json({ error: 'Failed to create payment order' });
