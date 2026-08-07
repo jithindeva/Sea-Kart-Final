@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 import { useUser } from "@/context/UserContext";
 import DeliveryScheduler from "./DeliveryScheduler";
+import { getApiBase } from '@/config/api';
 
 import PaymentModal from './PaymentModal';
 
@@ -187,14 +188,7 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
       }
 
       const orderId = order?.id;
-      const razorpayKey = order?.key || process.env.VITE_RAZORPAY_KEY_ID;
-
-      // If no valid order ID or test key is returned by backend, process order directly via API
-      if (!orderId || !razorpayKey) {
-        await executeOrderPlacement('Razorpay Online');
-        return;
-      }
-
+      const razorpayKey = order?.key || (import.meta.env as any).VITE_RAZORPAY_KEY_ID || 'rzp_test_TIDWCx3F9hY5RS';
       const orderAmountPaise = order?.amount || Math.round(amount * 100);
 
       const options = {
@@ -203,7 +197,7 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
         currency: 'INR',
         name: 'Sea Kart',
         description: 'Fresh Seafood Delivery',
-        order_id: orderId,
+        order_id: orderId || undefined,
         modal: {
           ondismiss: () => {
             setProcessingState('IDLE');
