@@ -188,14 +188,7 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
       }
 
       const orderId = order?.id;
-      const razorpayKey = order?.key || (import.meta.env as any).VITE_RAZORPAY_KEY_ID;
-
-      // If no valid order ID or real Razorpay key is available from backend, execute order placement cleanly without crashing Android webview
-      if (!orderId || !razorpayKey || razorpayKey.includes('YourTestKey') || razorpayKey === 'rzp_test_TIDWCx3F9hY5RS') {
-        await executeOrderPlacement('Razorpay Online');
-        return;
-      }
-
+      const razorpayKey = order?.key || (import.meta.env as any).VITE_RAZORPAY_KEY_ID || 'rzp_test_TIDWCx3F9hY5RS';
       const orderAmountPaise = order?.amount || Math.round(amount * 100);
 
       const options = {
@@ -273,16 +266,17 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
       };
 
       const rzp = new (window as any).Razorpay(options);
-      rzp.on('payment.failed', async (response: any) => {
-        console.warn('Razorpay payment failed, falling back to direct order placement:', response);
-        await executeOrderPlacement('Razorpay Online');
+      rzp.on('payment.failed', (response: any) => {
+        toast.error(response.error?.description || 'Razorpay Payment failed. Please try again.');
+        setProcessingState('IDLE');
+        onOpenChange(true);
       });
 
       onOpenChange(false);
       rzp.open();
     } catch (err: any) {
-      console.warn('Failed to launch Razorpay popup, falling back to direct order placement:', err);
-      await executeOrderPlacement('Razorpay Online');
+      toast.error(err.message || 'Failed to open Razorpay payment window');
+      setProcessingState('IDLE');
     }
   };
 
