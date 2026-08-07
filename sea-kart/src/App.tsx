@@ -20,30 +20,11 @@ import { ThemeProvider } from "./components/ThemeProvider";
 const queryClient = new QueryClient();
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "DEMO_GOOGLE_CLIENT_ID";
 
-// Helper component to reset to home page on fresh app open
+// Helper component for session management
 const AppSessionManager = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-
   useEffect(() => {
-    const APP_VERSION = '2.0.3-gmail-passwordless';
-    if (localStorage.getItem('sk_react_app_version') !== APP_VERSION) {
-      localStorage.setItem('sk_react_app_version', APP_VERSION);
-      if ('caches' in window) {
-        caches.keys().then(names => Promise.all(names.map(n => caches.delete(n))));
-      }
-      window.location.reload();
-      return;
-    }
-
-    const isNewSession = !sessionStorage.getItem('seakart_active_session');
-    if (isNewSession) {
-      sessionStorage.setItem('seakart_active_session', 'true');
-      if (location.pathname !== '/' && !location.pathname.startsWith('/admin')) {
-        navigate('/', { replace: true });
-      }
-    }
-  }, [location.pathname, navigate]);
+    // Preserve logged in user session without aggressive page reload loops
+  }, []);
 
   return null;
 };

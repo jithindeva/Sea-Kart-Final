@@ -1,5 +1,5 @@
-// SeaKart Service Worker - v2.1 (Google OAuth & Payment Fix Update)
-const CACHE_NAME = 'seakart-v2.1';
+// SeaKart Service Worker - v2.2 (Payment Modal & Session Fix Update)
+const CACHE_NAME = 'seakart-v2.2';
 
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {

@@ -7,6 +7,16 @@ export const PWAInstallPrompt: React.FC = () => {
   const [showInstallBtn, setShowInstallBtn] = useState(false);
 
   useEffect(() => {
+    const isInstalled = window.matchMedia('(display-mode: standalone)').matches 
+      || (navigator as any).standalone 
+      || localStorage.getItem('sk_pwa_installed') === 'true'
+      || window.location.pathname.startsWith('/dashboard');
+
+    if (isInstalled) {
+      setShowInstallBtn(false);
+      return;
+    }
+
     const handler = (e: any) => {
       e.preventDefault();
       setDeferredPrompt(e);
@@ -22,12 +32,19 @@ export const PWAInstallPrompt: React.FC = () => {
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
     if (outcome === 'accepted') {
+      localStorage.setItem('sk_pwa_installed', 'true');
       setShowInstallBtn(false);
     }
     setDeferredPrompt(null);
   };
 
-  if (!showInstallBtn) return null;
+  const isAlreadyInstalledOrDashboard = typeof window !== 'undefined' && (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    localStorage.getItem('sk_pwa_installed') === 'true' ||
+    window.location.pathname.startsWith('/dashboard')
+  );
+
+  if (!showInstallBtn || isAlreadyInstalledOrDashboard) return null;
 
   return (
     <div className="fixed bottom-4 left-4 right-4 z-[9999] bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between border border-blue-400/40">

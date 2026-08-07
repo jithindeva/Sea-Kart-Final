@@ -228,20 +228,22 @@ const Navbar = () => {
             <a href="#about" onClick={(e) => handleScroll(e, '#about', 'about')} className={`block text-center ${getNavClass('about')}`}>About Us</a>
             <a href="#contact" onClick={(e) => handleScroll(e, '#contact', 'contact')} className={`block text-center ${getNavClass('contact')}`}>Contact</a>
             
-            <Button 
-              onClick={() => {
-                const promptEvent = (window as any).deferredPwaPrompt;
-                if (promptEvent) {
-                  promptEvent.prompt();
-                } else {
-                  alert('📲 To Install SeaKart App:\n\n• Android (Chrome): Tap 3 dots ⋮ at top right → Tap "Add to Home screen" or "Install App".\n• iPhone (Safari): Tap Share button → Tap "Add to Home Screen".');
-                }
-              }} 
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white gap-2 rounded-full font-bold flex items-center justify-center shadow-md shadow-emerald-500/20"
-            >
-              <Download className="w-4 h-4" />
-              📲 Install SeaKart App
-            </Button>
+            {typeof window !== 'undefined' && !window.location.pathname.startsWith('/dashboard') && !window.matchMedia('(display-mode: standalone)').matches && localStorage.getItem('sk_pwa_installed') !== 'true' && (
+              <Button 
+                onClick={() => {
+                  const promptEvent = (window as any).deferredPwaPrompt;
+                  if (promptEvent) {
+                    promptEvent.prompt();
+                  } else {
+                    alert('📲 To Install SeaKart App:\n\n• Android (Chrome): Tap 3 dots ⋮ at top right → Tap "Add to Home screen" or "Install App".\n• iPhone (Safari): Tap Share button → Tap "Add to Home Screen".');
+                  }
+                }} 
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white gap-2 rounded-full font-bold flex items-center justify-center shadow-md shadow-emerald-500/20"
+              >
+                <Download className="w-4 h-4" />
+                📲 Install SeaKart App
+              </Button>
+            )}
 
             <Button 
               onClick={forceAppUpdate} 

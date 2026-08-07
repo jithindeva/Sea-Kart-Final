@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useUser } from "@/context/UserContext";
 import DeliveryScheduler from "./DeliveryScheduler";
 
-import { getApiBase } from "@/config/api";
+import PaymentModal from './PaymentModal';
 
 interface CartDrawerProps {
   open: boolean;
@@ -26,6 +26,7 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
   const { cart, removeFromCart, totalItems, clearCart } = useCart();
   const [processingState, setProcessingState] = useState<'IDLE' | 'PROCESSING'>('IDLE');
   const [selectedSlot, setSelectedSlot] = useState('');
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
   const { token, user } = useUser();
   const [deliveryAddress, setDeliveryAddress] = useState('');
@@ -72,7 +73,57 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
     }
   };
 
-  const handlePayment = async () => {
+  const executeOrderPlacement = async (paymentMethodUsed = 'Online / UPI') => {
+    setProcessingState('PROCESSING');
+    const amount = calculateTotal();
+    try {
+      const res = await fetch(`${getApiBase()}/api/orders`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          items: cart,
+          total: `₹${amount}`,
+          paymentMethod: paymentMethodUsed,
+          deliverySlot: selectedSlot,
+          address: deliveryAddress.trim(),
+        }),
+      });
+      if (!res.ok) throw new Error('Order creation failed');
+      const createdOrder = await res.json();
+      toast.success('Payment completed & order placed!');
+
+      try {
+        const itemsList = cart.map(i => `• ${i.name} (${i.unitLabel || '1 Kg'}) × ${i.quantity}`).join('\n');
+        const waMsg = `📦 *NEW ORDER CONFIRMED - SEA KART*\n\n` +
+          `*Order ID:* ${createdOrder?.id || '#SK-NEW'}\n` +
+          `*Customer:* ${user?.name || 'Customer'} (${user?.phone || 'N/A'})\n` +
+          `*Delivery Slot:* ${selectedSlot}\n` +
+          `*Delivery Address:* ${deliveryAddress.trim()}\n\n` +
+          `*Ordered Items:*\n${itemsList}\n\n` +
+          `*Total Amount:* ₹${amount}\n` +
+          `*Payment:* ${paymentMethodUsed}\n\n` +
+          `Track Order: ${window.location.origin}/track-order/${createdOrder?.id || ''}`;
+
+        window.open(`https://api.whatsapp.com/send?phone=919380382950&text=${encodeURIComponent(waMsg)}`, '_blank');
+      } catch (e) {
+        console.error('WhatsApp auto-send error:', e);
+      }
+
+      clearCart();
+      setSelectedSlot('');
+      setIsPaymentModalOpen(false);
+      onOpenChange(false);
+      window.location.href = '/dashboard';
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to place order');
+      setProcessingState('IDLE');
+    }
+  };
+
+  const handleOpenPaymentOptions = () => {
     if (!token) {
       toast.error('Please login to place an order');
       return;
@@ -90,155 +141,7 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
       return;
     }
 
-    setProcessingState('PROCESSING');
-    const amount = calculateTotal();
-
-    const completeOrderPlacement = async (paymentMethodUsed = 'Razorpay Online') => {
-      try {
-        const res = await fetch(`${getApiBase()}/api/orders`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            items: cart,
-            total: `₹${amount}`,
-            paymentMethod: paymentMethodUsed,
-            deliverySlot: selectedSlot,
-            address: deliveryAddress.trim(),
-          }),
-        });
-        if (!res.ok) throw new Error('Order creation failed');
-        const createdOrder = await res.json();
-        toast.success('Payment completed & order placed!');
-
-        try {
-          const itemsList = cart.map(i => `• ${i.name} (${i.unitLabel || '1 Kg'}) × ${i.quantity}`).join('\n');
-          const waMsg = `📦 *NEW ORDER CONFIRMED - SEA KART*\n\n` +
-            `*Order ID:* ${createdOrder?.id || '#SK-NEW'}\n` +
-            `*Customer:* ${user?.name || 'Customer'} (${user?.phone || 'N/A'})\n` +
-            `*Delivery Slot:* ${selectedSlot}\n` +
-            `*Delivery Address:* ${deliveryAddress.trim()}\n\n` +
-            `*Ordered Items:*\n${itemsList}\n\n` +
-            `*Total Amount:* ₹${amount}\n` +
-            `*Payment:* ${paymentMethodUsed}\n\n` +
-            `Track Order: ${window.location.origin}/track-order/${createdOrder?.id || ''}`;
-
-          window.open(`https://api.whatsapp.com/send?phone=919380382950&text=${encodeURIComponent(waMsg)}`, '_blank');
-        } catch (e) {
-          console.error('WhatsApp auto-send error:', e);
-        }
-
-        clearCart();
-        setSelectedSlot('');
-        window.location.href = '/dashboard';
-      } catch (err: any) {
-        toast.error(err.message || 'Failed to place order');
-        setProcessingState('IDLE');
-      }
-    };
-
-    try {
-      const scriptLoaded = await loadRazorpayScript();
-      if (!scriptLoaded) {
-        await completeOrderPlacement('Pay on Delivery / Prepaid');
-        return;
-      }
-
-      let order: any = null;
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 4000);
-        const res = await fetch(`${getApiBase()}/api/payment/create-order`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ amount }),
-          signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-        if (res.ok) {
-          order = await res.json();
-        }
-      } catch (e) {
-        console.warn('Fast checkout fallback active:', e);
-      }
-
-      const orderId = order?.id || `order_rcpt_${Date.now()}`;
-      const razorpayKey = order?.key || 'rzp_test_TIDWCx3F9hY5RS';
-      const orderAmountPaise = order?.amount || Math.round(amount * 100);
-
-      const options = {
-        key: razorpayKey,
-        amount: orderAmountPaise,
-        currency: 'INR',
-        name: 'Sea Kart',
-        description: 'Fresh Seafood Delivery',
-        order_id: order?.id ? order.id : undefined,
-        modal: {
-          ondismiss: () => {
-            setProcessingState('IDLE');
-            onOpenChange(true);
-            toast.info('Payment window closed.');
-          },
-        },
-        handler: async (response: any) => {
-          try {
-            setProcessingState('PROCESSING');
-            const verifyRes = await fetch(
-              `${getApiBase()}/api/payment/verify`,
-              {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                  ...response,
-                  items: cart,
-                  total: `₹${amount}`,
-                  paymentMethod: 'Razorpay Online',
-                  deliverySlot: selectedSlot,
-                  address: deliveryAddress.trim(),
-                }),
-              }
-            );
-            if (!verifyRes.ok) throw new Error('Verification failed');
-            const verifyData = await verifyRes.json();
-            const createdOrder = verifyData.order;
-
-            toast.success('Payment successful & order placed!');
-
-            clearCart();
-            setSelectedSlot('');
-            window.location.href = '/dashboard';
-          } catch {
-            await completeOrderPlacement('Online Payment (Verified)');
-          }
-        },
-        prefill: {
-          name: user?.name || 'Customer',
-          email: user?.email || 'customer@example.com',
-          contact: user?.phone || '9999999999',
-        },
-        theme: { color: '#2563eb' },
-      };
-
-      const rzp = new (window as any).Razorpay(options);
-      rzp.on('payment.failed', async (response: any) => {
-        console.warn('Razorpay failed, completing order fallback:', response?.error);
-        await completeOrderPlacement('Razorpay Online (Fallback)');
-      });
-
-      onOpenChange(false);
-      rzp.open();
-    } catch (err: any) {
-      console.warn('Razorpay initiation error, falling back:', err);
-      await completeOrderPlacement('Online Payment');
-    }
+    setIsPaymentModalOpen(true);
   };
 
   const handleClose = (newOpen: boolean) => {
@@ -332,12 +235,21 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
                 {/* ── Payment options ── */}
                 <div className="px-6 pb-6 space-y-3 border-t border-slate-100 dark:border-slate-800 pt-4">
                   <Button
-                    onClick={handlePayment}
-                    disabled={!selectedSlot}
+                    onClick={handleOpenPaymentOptions}
+                    disabled={!selectedSlot || !deliveryAddress.trim()}
                     className="w-full h-13 rounded-xl flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-base transition-all shadow-lg hover:shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Smartphone className="w-5 h-5" />
-                    Pay Online (Razorpay / UPI)
+                    Pay Online (UPI / GPay / Paytm)
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => executeOrderPlacement('Cash on Delivery')}
+                    disabled={!selectedSlot || !deliveryAddress.trim()}
+                    className="w-full h-12 rounded-xl flex items-center justify-center gap-2 text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 font-bold"
+                  >
+                    <Banknote className="w-5 h-5" />
+                    Cash on Delivery (COD)
                   </Button>
                   <Button
                     variant="ghost"
@@ -367,6 +279,13 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
             </div>
           </div>
         )}
+
+        <PaymentModal
+          isOpen={isPaymentModalOpen}
+          onClose={() => setIsPaymentModalOpen(false)}
+          total={`₹${calculateTotal()}`}
+          onSuccess={(method) => executeOrderPlacement(method)}
+        />
       </SheetContent>
     </Sheet>
   );
