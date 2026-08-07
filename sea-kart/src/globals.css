@@ -120,12 +120,28 @@
   background: linear-gradient(-45deg, #f0f9ff, #e0f2fe, #cffafe, #e0e7ff);
   background-size: 400% 400%;
   animation: gradientShift 15s ease infinite;
+  will-change: background-position;
+  transform: translateZ(0);
 }
 
 .dark .bg-animated-mesh {
   background: linear-gradient(-45deg, #020617, #0f172a, #082f49, #1e1b4b);
   background-size: 400% 400%;
   animation: gradientShift 15s ease infinite;
+  will-change: background-position;
+  transform: translateZ(0);
+}
+
+/* Smooth Scrolling & GPU Acceleration */
+html, body {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
 }
 
 @keyframes pulse-slow {

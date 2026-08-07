@@ -1,5 +1,5 @@
-// SeaKart Service Worker - v2.9 (Mobile Android Razorpay Popup Fix)
-const CACHE_NAME = 'seakart-v2.9';
+// SeaKart Service Worker - v3.0 (Smoothness Optimization & Zero Lag Update)
+const CACHE_NAME = 'seakart-v3.0';
 
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
