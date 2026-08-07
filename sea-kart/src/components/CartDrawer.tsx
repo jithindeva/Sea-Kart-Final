@@ -73,7 +73,24 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
     }
   };
 
-  const executeOrderPlacement = async (paymentMethodUsed = 'Online / UPI') => {
+  const executeOrderPlacement = async (paymentMethodUsed = 'Cash on Delivery') => {
+    if (!token) {
+      toast.error('Please login to place an order');
+      return;
+    }
+    if (!selectedSlot) {
+      toast.error('Please select a delivery date and time.');
+      return;
+    }
+    if (!deliveryAddress.trim()) {
+      toast.error('Please enter a delivery address.');
+      return;
+    }
+    if (!isSlotValid()) {
+      toast.error('Delivery time must be at least 1 hour from now. Please choose a later time.');
+      return;
+    }
+
     setProcessingState('PROCESSING');
     const amount = calculateTotal();
     try {
@@ -93,7 +110,7 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
       });
       if (!res.ok) throw new Error('Order creation failed');
       const createdOrder = await res.json();
-      toast.success('Payment completed & order placed!');
+      toast.success('Order placed successfully!');
 
       try {
         const itemsList = cart.map(i => `• ${i.name} (${i.unitLabel || '1 Kg'}) × ${i.quantity}`).join('\n');
@@ -114,7 +131,6 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
 
       clearCart();
       setSelectedSlot('');
-      setIsPaymentModalOpen(false);
       onOpenChange(false);
       window.location.href = '/dashboard';
     } catch (err: any) {
@@ -123,7 +139,7 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
     }
   };
 
-  const handleOpenPaymentOptions = () => {
+  const handleRazorpayPayment = async () => {
     if (!token) {
       toast.error('Please login to place an order');
       return;
@@ -141,7 +157,126 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
       return;
     }
 
-    setIsPaymentModalOpen(true);
+    setProcessingState('PROCESSING');
+
+    try {
+      const scriptLoaded = await loadRazorpayScript();
+      if (!scriptLoaded) {
+        toast.error('Could not load Razorpay SDK. Please check your network.');
+        setProcessingState('IDLE');
+        return;
+      }
+
+      const amount = calculateTotal();
+      let order: any = null;
+
+      try {
+        const res = await fetch(`${getApiBase()}/api/payment/create-order`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ amount }),
+        });
+        if (res.ok) {
+          order = await res.json();
+        }
+      } catch (e) {
+        console.warn('Razorpay order creation warning:', e);
+      }
+
+      const orderId = order?.id;
+      const razorpayKey = order?.key || 'rzp_test_TIDWCx3F9hY5RS';
+      const orderAmountPaise = order?.amount || Math.round(amount * 100);
+
+      const options = {
+        key: razorpayKey,
+        amount: orderAmountPaise,
+        currency: 'INR',
+        name: 'Sea Kart',
+        description: 'Fresh Seafood Delivery',
+        order_id: orderId || undefined,
+        modal: {
+          ondismiss: () => {
+            setProcessingState('IDLE');
+            onOpenChange(true);
+            toast.info('Razorpay payment window closed.');
+          },
+        },
+        handler: async (response: any) => {
+          try {
+            setProcessingState('PROCESSING');
+            const verifyRes = await fetch(
+              `${getApiBase()}/api/payment/verify`,
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                  ...response,
+                  items: cart,
+                  total: `₹${amount}`,
+                  paymentMethod: 'Razorpay Online',
+                  deliverySlot: selectedSlot,
+                  address: deliveryAddress.trim(),
+                }),
+              }
+            );
+            if (!verifyRes.ok) throw new Error('Verification failed');
+            const verifyData = await verifyRes.json();
+            const createdOrder = verifyData.order;
+
+            toast.success('Razorpay Payment successful & order placed!');
+
+            try {
+              const itemsList = cart.map(i => `• ${i.name} (${i.unitLabel || '1 Kg'}) × ${i.quantity}`).join('\n');
+              const waMsg = `📦 *NEW ORDER CONFIRMED - SEA KART*\n\n` +
+                `*Order ID:* ${createdOrder?.id || '#SK-NEW'}\n` +
+                `*Customer:* ${user?.name || 'Customer'} (${user?.phone || 'N/A'})\n` +
+                `*Delivery Slot:* ${selectedSlot}\n` +
+                `*Delivery Address:* ${deliveryAddress.trim()}\n\n` +
+                `*Ordered Items:*\n${itemsList}\n\n` +
+                `*Total Amount:* ₹${amount}\n` +
+                `*Payment:* Razorpay Online\n\n` +
+                `Track Order: ${window.location.origin}/track-order/${createdOrder?.id || ''}`;
+
+              window.open(`https://api.whatsapp.com/send?phone=919380382950&text=${encodeURIComponent(waMsg)}`, '_blank');
+            } catch (e) {
+              console.error('WhatsApp auto-send error:', e);
+            }
+
+            clearCart();
+            setSelectedSlot('');
+            window.location.href = '/dashboard';
+          } catch (err: any) {
+            toast.error(err.message || 'Razorpay payment verification failed.');
+            setProcessingState('IDLE');
+          }
+        },
+        prefill: {
+          name: user?.name || 'Customer',
+          email: user?.email || 'customer@example.com',
+          contact: user?.phone || '9999999999',
+        },
+        theme: { color: '#2563eb' },
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.on('payment.failed', (response: any) => {
+        toast.error(response.error?.description || 'Razorpay Payment failed. Please try again.');
+        setProcessingState('IDLE');
+        onOpenChange(true);
+      });
+
+      onOpenChange(false);
+      rzp.open();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to open Razorpay payment window');
+      setProcessingState('IDLE');
+    }
   };
 
   const handleClose = (newOpen: boolean) => {
@@ -235,12 +370,12 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
                 {/* ── Payment options ── */}
                 <div className="px-6 pb-6 space-y-3 border-t border-slate-100 dark:border-slate-800 pt-4">
                   <Button
-                    onClick={handleOpenPaymentOptions}
+                    onClick={handleRazorpayPayment}
                     disabled={!selectedSlot || !deliveryAddress.trim()}
                     className="w-full h-13 rounded-xl flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-base transition-all shadow-lg hover:shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Smartphone className="w-5 h-5" />
-                    Pay Online (UPI / GPay / Paytm)
+                    Pay Online with Razorpay (Cards / UPI / NetBanking)
                   </Button>
                   <Button
                     variant="outline"
@@ -271,21 +406,14 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
               <div className="absolute inset-0 rounded-full border-4 border-blue-600 border-t-transparent animate-spin" />
             </div>
             <div>
-              <h3 className="text-2xl font-bold text-blue-950 dark:text-white mb-2">Processing Order...</h3>
-              <p className="text-slate-500">Please complete the payment or wait a moment.</p>
+              <h3 className="text-2xl font-bold text-blue-950 dark:text-white mb-2">Opening Razorpay Payment...</h3>
+              <p className="text-slate-500">Please complete the payment in the Razorpay window.</p>
               {selectedSlot && (
                 <p className="text-sm text-blue-600 font-medium mt-2">📦 Delivery: {selectedSlot}</p>
               )}
             </div>
           </div>
         )}
-
-        <PaymentModal
-          isOpen={isPaymentModalOpen}
-          onClose={() => setIsPaymentModalOpen(false)}
-          total={`₹${calculateTotal()}`}
-          onSuccess={(method) => executeOrderPlacement(method)}
-        />
       </SheetContent>
     </Sheet>
   );

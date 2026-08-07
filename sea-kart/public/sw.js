@@ -1,5 +1,5 @@
-// SeaKart Service Worker - v2.2 (Payment Modal & Session Fix Update)
-const CACHE_NAME = 'seakart-v2.2';
+// SeaKart Service Worker - v2.3 (Official Razorpay Restoration)
+const CACHE_NAME = 'seakart-v2.3';
 
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
