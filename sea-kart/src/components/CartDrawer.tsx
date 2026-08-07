@@ -175,7 +175,7 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
 
             clearCart();
             setSelectedSlot('');
-            window.location.href = createdOrder?.id ? `/track-order/${createdOrder.id}` : '/dashboard';
+            window.location.href = '/dashboard';
           } catch {
             toast.error('Payment verification failed.');
             setProcessingState('IDLE');
@@ -263,7 +263,7 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
 
       clearCart();
       setSelectedSlot('');
-      window.location.href = createdOrder?.id ? `/track-order/${createdOrder.id}` : '/dashboard';
+      window.location.href = '/dashboard';
     } catch {
       toast.error('Failed to place Cash on Delivery order.');
       setProcessingState('IDLE');
