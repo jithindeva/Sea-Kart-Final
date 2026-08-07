@@ -1,5 +1,5 @@
 {
-  "id": "/",
+  "id": "/admin/",
   "short_name": "SeaKart Admin",
   "name": "Sea Kart Admin Portal",
   "description": "Manage orders, inventory stock, pricing, and customer accounts for Sea Kart.",
@@ -29,8 +29,8 @@
       "purpose": "maskable"
     }
   ],
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "/admin/",
+  "scope": "/admin/",
   "lang": "en",
   "background_color": "#0f172a",
   "theme_color": "#3b82f6",
