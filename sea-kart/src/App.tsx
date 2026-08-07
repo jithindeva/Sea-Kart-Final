@@ -1,8 +1,9 @@
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { CartProvider } from "./context/CartContext";
 import { UserProvider } from "./context/UserContext";
 import Index from "./pages/Index";
@@ -16,6 +17,24 @@ import { ThemeProvider } from "./components/ThemeProvider";
 
 const queryClient = new QueryClient();
 
+// Helper component to reset to home page on fresh app open
+const AppSessionManager = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const isNewSession = !sessionStorage.getItem('seakart_active_session');
+    if (isNewSession) {
+      sessionStorage.setItem('seakart_active_session', 'true');
+      if (location.pathname !== '/' && !location.pathname.startsWith('/admin')) {
+        navigate('/', { replace: true });
+      }
+    }
+  }, [location.pathname, navigate]);
+
+  return null;
+};
+
 const App = () => (
   <ThemeProvider defaultTheme="dark" storageKey="sea-kart-theme">
     <QueryClientProvider client={queryClient}>
@@ -25,6 +44,7 @@ const App = () => (
             <Toaster />
             <Sonner position="top-center" />
             <BrowserRouter>
+              <AppSessionManager />
               <TopBanner />
               <div className="pt-8 min-h-screen bg-animated-mesh">
                 <Routes>

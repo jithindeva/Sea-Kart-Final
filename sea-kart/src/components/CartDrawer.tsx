@@ -34,6 +34,8 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
     if (user?.address && !deliveryAddress) {
       setDeliveryAddress(user.address);
     }
+    // Preload Razorpay script in parallel so payment modal opens instantly
+    loadRazorpayScript();
   }, [user]);
 
   const extractPrice = (priceStr: string) => {
@@ -49,6 +51,7 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
       if ((window as any).Razorpay) return resolve(true);
       const script = document.createElement('script');
       script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.async = true;
       script.onload = () => resolve(true);
       script.onerror = () => resolve(false);
       document.body.appendChild(script);
@@ -122,7 +125,7 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
         modal: {
           ondismiss: () => {
             setProcessingState('IDLE');
-            setTimeout(() => onOpenChange(true), 150);
+            onOpenChange(true);
             toast.info('Payment window closed.');
           },
         },
@@ -190,11 +193,11 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
       rzp.on('payment.failed', (response: any) => {
         toast.error(response.error?.description || 'Payment failed. Please try again.');
         setProcessingState('IDLE');
-        setTimeout(() => onOpenChange(true), 150);
+        onOpenChange(true);
       });
 
       onOpenChange(false);
-      setTimeout(() => rzp.open(), 150);
+      rzp.open();
     } catch (err: any) {
       toast.error(err.message || 'Failed to initiate payment');
       setProcessingState('IDLE');
