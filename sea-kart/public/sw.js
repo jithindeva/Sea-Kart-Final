@@ -1,5 +1,5 @@
-// SeaKart Service Worker - v2.6 (getApiBase & Mobile Razorpay Fix)
-const CACHE_NAME = 'seakart-v2.6';
+// SeaKart Service Worker - v2.7 (Android Mobile WebView Razorpay Fix)
+const CACHE_NAME = 'seakart-v2.7';
 
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
