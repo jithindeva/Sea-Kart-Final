@@ -204,72 +204,6 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
     }
   };
 
-  const handleCodPayment = async () => {
-    if (!token) {
-      toast.error('Please login to place an order');
-      return;
-    }
-    if (!selectedSlot) {
-      toast.error('Please select a delivery date and time.');
-      return;
-    }
-    if (!deliveryAddress.trim()) {
-      toast.error('Please enter a delivery address.');
-      return;
-    }
-    if (!isSlotValid()) {
-      toast.error('Delivery time must be at least 1 hour from now. Please choose a later time.');
-      return;
-    }
-
-    setProcessingState('PROCESSING');
-    try {
-      const amount = calculateTotal();
-      const res = await fetch(`${getApiBase()}/api/orders`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          items: cart,
-          total: `₹${amount}`,
-          paymentMethod: 'Cash / UPI on Delivery',
-          deliverySlot: selectedSlot,
-          address: deliveryAddress.trim(),
-        }),
-      });
-
-      if (!res.ok) throw new Error('Order creation failed');
-      const createdOrder = await res.json();
-      toast.success('Order placed successfully! Pay on delivery.');
-
-      try {
-        const itemsList = cart.map(i => `• ${i.name} (${i.unitLabel || '1 Kg'}) × ${i.quantity}`).join('\n');
-        const waMsg = `📦 *NEW ORDER CONFIRMED - SEA KART*\n\n` +
-          `*Order ID:* ${createdOrder?.id || '#SK-NEW'}\n` +
-          `*Customer:* ${user?.name || 'Customer'} (${user?.phone || 'N/A'})\n` +
-          `*Delivery Slot:* ${selectedSlot}\n` +
-          `*Delivery Address:* ${deliveryAddress.trim()}\n\n` +
-          `*Ordered Items:*\n${itemsList}\n\n` +
-          `*Total Amount:* ₹${amount}\n` +
-          `*Payment:* Cash / UPI on Delivery\n\n` +
-          `Track Order: ${window.location.origin}/track-order/${createdOrder?.id || ''}`;
-
-        window.open(`https://api.whatsapp.com/send?phone=919380382950&text=${encodeURIComponent(waMsg)}`, '_blank');
-      } catch (e) {
-        console.error('WhatsApp error:', e);
-      }
-
-      clearCart();
-      setSelectedSlot('');
-      window.location.href = '/dashboard';
-    } catch {
-      toast.error('Failed to place Cash on Delivery order.');
-      setProcessingState('IDLE');
-    }
-  };
-
   const handleClose = (newOpen: boolean) => {
     if (!newOpen && processingState !== 'IDLE') return;
     onOpenChange(newOpen);
@@ -367,15 +301,6 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
                   >
                     <Smartphone className="w-5 h-5" />
                     Pay Online (Razorpay / UPI)
-                  </Button>
-                  <Button
-                    onClick={handleCodPayment}
-                    disabled={!selectedSlot}
-                    variant="outline"
-                    className="w-full h-12 rounded-xl flex items-center justify-center gap-3 border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-bold text-sm hover:bg-slate-100 dark:hover:bg-slate-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <Banknote className="w-5 h-5 text-emerald-600" />
-                    Cash / UPI on Delivery
                   </Button>
                   <Button
                     variant="ghost"
