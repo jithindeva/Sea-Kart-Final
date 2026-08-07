@@ -12,6 +12,7 @@ import TrackOrder from "./pages/TrackOrder";
 import NotFound from "./pages/NotFound";
 import AdminPage from "./pages/AdminPage";
 import TopBanner from "./components/TopBanner";
+import UpdateNotification from "./components/UpdateNotification";
 
 import { ThemeProvider } from "./components/ThemeProvider";
 
@@ -43,6 +44,7 @@ const App = () => (
           <TooltipProvider>
             <Toaster />
             <Sonner position="top-center" />
+            <UpdateNotification />
             <BrowserRouter>
               <AppSessionManager />
               <TopBanner />
