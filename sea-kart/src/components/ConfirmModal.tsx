@@ -1,72 +1,124 @@
-import React from 'react';
-import { AlertCircle, LogOut } from 'lucide-react';
-import { Button } from './ui/button';
+import { AlertTriangle, LogOut, CheckCircle2, Trash2, Truck } from 'lucide-react';
 
 interface ConfirmModalProps {
   isOpen: boolean;
-  title?: string;
+  title: string;
   message: string;
   confirmText?: string;
   cancelText?: string;
   onConfirm: () => void;
   onCancel: () => void;
-  variant?: 'danger' | 'warning' | 'info';
+  type?: 'logout' | 'delivered' | 'out_of_delivery' | 'delete';
 }
 
-const ConfirmModal: React.FC<ConfirmModalProps> = ({
+export default function ConfirmModal({
   isOpen,
-  title = "Confirm Action",
+  title,
   message,
-  confirmText = "Yes, Continue",
-  cancelText = "Cancel",
+  confirmText = 'Yes, Proceed',
+  cancelText = 'Cancel',
   onConfirm,
   onCancel,
-  variant = 'danger'
-}) => {
+  type = 'logout'
+}: ConfirmModalProps) {
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 w-full max-w-sm relative shadow-2xl animate-in zoom-in-95 duration-200 text-center">
-        {/* Animated top rainbow accent */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-cyan-400 rounded-t-3xl" />
+  const getIcon = () => {
+    switch (type) {
+      case 'logout': return <LogOut style={{ width: 28, height: 28, color: '#f87171' }} />;
+      case 'out_of_delivery': return <Truck style={{ width: 28, height: 28, color: '#60a5fa' }} />;
+      case 'delivered': return <CheckCircle2 style={{ width: 28, height: 28, color: '#34d399' }} />;
+      case 'delete': return <Trash2 style={{ width: 28, height: 28, color: '#f87171' }} />;
+      default: return <AlertTriangle style={{ width: 28, height: 28, color: '#fbbf24' }} />;
+    }
+  };
 
-        {/* Top Icon Badge */}
-        <div className={`w-14 h-14 mx-auto mb-4 rounded-2xl flex items-center justify-center mt-2 ${
-          variant === 'danger' 
-            ? 'bg-red-50 dark:bg-red-950/40 text-red-500' 
-            : 'bg-blue-50 dark:bg-blue-950/40 text-blue-500'
-        }`}>
-          {variant === 'danger' ? <LogOut className="w-7 h-7" /> : <AlertCircle className="w-7 h-7" />}
+  const getBtnBg = () => {
+    switch (type) {
+      case 'logout':
+      case 'delete':
+        return 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+      case 'delivered':
+        return 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+      case 'out_of_delivery':
+        return 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
+      default:
+        return 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)';
+    }
+  };
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 9999,
+      background: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(8px)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
+    }}>
+      <style>{`
+        @keyframes modalPop {
+          from { opacity: 0; transform: scale(0.92) translateY(10px); }
+          to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .modal-card { animation: modalPop 0.22s ease-out both; }
+      `}</style>
+
+      <div className="modal-card" style={{
+        background: '#1e293b', border: '1px solid rgba(148,163,184,0.2)',
+        borderRadius: '24px', padding: '32px', width: '100%', maxWidth: '380px',
+        textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
+        position: 'relative', overflow: 'hidden'
+      }}>
+        {/* Animated Top Rainbow Bar */}
+        <div style={{
+          position: 'absolute', top: 0, left: 0, right: 0, height: '4px',
+          background: 'linear-gradient(90deg, #3b82f6, #06b6d4, #6366f1, #8b5cf6, #3b82f6)',
+          backgroundSize: '300% 100%',
+          animation: 'rainbowSlide 3s linear infinite'
+        }} />
+
+        {/* Icon Circle */}
+        <div style={{
+          width: '60px', height: '60px', borderRadius: '20px', margin: '0 auto 16px',
+          background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}>
+          {getIcon()}
         </div>
 
-        {/* Title & Message */}
-        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">{title}</h3>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">{message}</p>
+        <h3 style={{ fontSize: '20px', fontWeight: 800, color: 'white', margin: '0 0 8px', letterSpacing: '-0.3px' }}>
+          {title}
+        </h3>
+        <p style={{ fontSize: '13px', color: '#94a3b8', margin: '0 0 24px', lineHeight: 1.5 }}>
+          {message}
+        </p>
 
-        {/* Buttons */}
-        <div className="flex gap-3">
-          <Button
-            variant="outline"
+        {/* Action Buttons */}
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button
             onClick={onCancel}
-            className="flex-1 rounded-xl py-5 font-bold border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+            style={{
+              flex: 1, padding: '12px', borderRadius: '12px', border: '1px solid rgba(148,163,184,0.3)',
+              background: 'transparent', color: '#94a3b8', fontWeight: 700, fontSize: '13px',
+              cursor: 'pointer', transition: 'all 0.15s'
+            }}
+            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.05)'; (e.currentTarget as HTMLButtonElement).style.color = 'white'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; (e.currentTarget as HTMLButtonElement).style.color = '#94a3b8'; }}
           >
             {cancelText}
-          </Button>
-          <Button
+          </button>
+          <button
             onClick={onConfirm}
-            className={`flex-1 rounded-xl py-5 font-bold text-white shadow-lg transition-all ${
-              variant === 'danger'
-                ? 'bg-red-500 hover:bg-red-600 shadow-red-500/20'
-                : 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/20'
-            }`}
+            style={{
+              flex: 1, padding: '12px', borderRadius: '12px', border: 'none',
+              background: getBtnBg(), color: 'white', fontWeight: 700, fontSize: '13px',
+              cursor: 'pointer', boxShadow: '0 4px 15px rgba(0,0,0,0.3)', transition: 'transform 0.15s'
+            }}
+            onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-1px)'}
+            onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)'}
           >
             {confirmText}
-          </Button>
+          </button>
         </div>
       </div>
     </div>
   );
-};
-
-export default ConfirmModal;
+}

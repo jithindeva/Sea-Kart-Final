@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import TrackOrder from "./pages/TrackOrder";
 import NotFound from "./pages/NotFound";
+import AdminPage from "./pages/AdminPage";
 import TopBanner from "./components/TopBanner";
 
 import { ThemeProvider } from "./components/ThemeProvider";
@@ -31,6 +32,8 @@ const App = () => (
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/track-order" element={<TrackOrder />} />
                   <Route path="/track-order/:orderId" element={<TrackOrder />} />
+                  <Route path="/admin" element={<AdminPage />} />
+                  <Route path="/admin/*" element={<AdminPage />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </div>
