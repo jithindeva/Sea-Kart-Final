@@ -42,11 +42,27 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const [cart, setCart] = useState<CartItem[]>(() => {
+    try {
+      const savedCart = localStorage.getItem('seakart_user_cart');
+      return savedCart ? JSON.parse(savedCart) : [];
+    } catch (e) {
+      return [];
+    }
+  });
   const [orders, setOrders] = useState<Order[]>([]);
   const { token, user, updateUser } = useUser();
 
   const wishlist = user?.wishlist || [];
+
+  // Persist cart to localStorage on every change
+  useEffect(() => {
+    try {
+      localStorage.setItem('seakart_user_cart', JSON.stringify(cart));
+    } catch (e) {
+      console.error('Failed to persist cart:', e);
+    }
+  }, [cart]);
 
   useEffect(() => {
     if (token) {
@@ -67,7 +83,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       return () => clearInterval(interval);
     } else {
       setOrders([]);
-      setCart([]);
     }
   }, [token]);
 
@@ -159,7 +174,14 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setCart(prev => prev.filter(item => !(item.id === productId && (!unitLabel || item.unitLabel === unitLabel))));
   };
 
-  const clearCart = () => setCart([]);
+  const clearCart = () => {
+    setCart([]);
+    try {
+      localStorage.removeItem('seakart_user_cart');
+    } catch (e) {
+      console.error('Failed to clear cart storage:', e);
+    }
+  };
 
   const placeOrder = async (method: string) => {
     if (cart.length === 0) return;
