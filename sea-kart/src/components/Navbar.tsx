@@ -166,19 +166,7 @@ const Navbar = () => {
             ) : (
               <Button 
                 variant="ghost" 
-                onClick={() => {
-                  // Scroll to top of home page first, then open login modal
-                  if (location.pathname !== '/') {
-                    navigate('/');
-                    setTimeout(() => {
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
-                      setTimeout(() => setIsAuthOpen(true), 300);
-                    }, 100);
-                  } else {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                    setTimeout(() => setIsAuthOpen(true), 300);
-                  }
-                }}
+                onClick={() => setIsAuthOpen(true)}
                 className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-slate-800 gap-2 font-bold rounded-full px-5"
               >
                 <LogIn className="w-5 h-5" />
@@ -235,19 +223,7 @@ const Navbar = () => {
               </>
             ) : (
               <button
-                onClick={() => {
-                  setIsOpen(false);
-                  if (location.pathname !== '/') {
-                    navigate('/');
-                    setTimeout(() => {
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
-                      setTimeout(() => setIsAuthOpen(true), 300);
-                    }, 100);
-                  } else {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                    setTimeout(() => setIsAuthOpen(true), 300);
-                  }
-                }}
+                onClick={() => { setIsOpen(false); setIsAuthOpen(true); }}
                 className="w-full text-center py-2 text-blue-600 font-bold"
               >
                 Login
