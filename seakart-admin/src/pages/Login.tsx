@@ -179,7 +179,7 @@ export default function Login() {
             {/* Email field */}
             <div>
               <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'rgba(148,163,184,0.9)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Admin Email
+                Admin Google Email
               </label>
               <div style={{ position: 'relative' }}>
                 <Mail style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', width: 16, height: 16, color: 'rgba(148,163,184,0.5)' }} />
@@ -196,41 +196,6 @@ export default function Login() {
               </div>
             </div>
 
-            {/* Password field */}
-            <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'rgba(148,163,184,0.9)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Master Password
-              </label>
-              <div style={{ position: 'relative' }}>
-                <Lock style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', width: 16, height: 16, color: 'rgba(148,163,184,0.5)' }} />
-                <input
-                  id="admin-password"
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  className="input-field"
-                  placeholder="••••••••"
-                  autoComplete="current-password"
-                  style={{ paddingRight: '44px' }}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(v => !v)}
-                  style={{
-                    position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
-                    background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
-                    color: 'rgba(148,163,184,0.5)', transition: 'color 0.2s', display: 'flex', alignItems: 'center'
-                  }}
-                  onMouseEnter={e => (e.currentTarget.style.color = '#3b82f6')}
-                  onMouseLeave={e => (e.currentTarget.style.color = 'rgba(148,163,184,0.5)')}
-                  title={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? <EyeOff style={{ width: 16, height: 16 }} /> : <Eye style={{ width: 16, height: 16 }} />}
-                </button>
-              </div>
-            </div>
-
             <button
               id="admin-login-btn"
               type="submit"
@@ -238,16 +203,7 @@ export default function Login() {
               className="login-btn"
               style={{ marginTop: '8px' }}
             >
-              {loading ? (
-                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation: 'spin 1s linear infinite' }}>
-                    <path d="M21 12a9 9 0 11-6.219-8.56" />
-                  </svg>
-                  Authenticating...
-                </span>
-              ) : (
-                '🔐 Secure Login'
-              )}
+              {loading ? 'Authenticating...' : '🔐 Sign in as Admin'}
             </button>
           </form>
 

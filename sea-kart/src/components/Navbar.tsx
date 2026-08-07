@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { ShoppingCart, Phone, Menu, X, User, LogIn, LogOut } from 'lucide-react';
+import { ShoppingCart, Phone, Menu, X, User, LogIn, LogOut, RefreshCw, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/CartContext';
 import { useUser } from '@/context/UserContext';
@@ -19,6 +19,18 @@ const Navbar = () => {
   
   const navigate = useNavigate();
   const location = useLocation();
+
+  const forceAppUpdate = () => {
+    if ('caches' in window) {
+      caches.keys().then(names => Promise.all(names.map(n => caches.delete(n))));
+    }
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
+    }
+    localStorage.clear();
+    sessionStorage.clear();
+    window.location.reload();
+  };
 
   const [activeNav, setActiveNav] = useState<'home' | 'menu' | 'about' | 'contact' | 'dashboard'>(() => {
     const p = location.pathname;
@@ -162,6 +174,16 @@ const Navbar = () => {
               </Button>
             )}
 
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={forceAppUpdate}
+              title="Force Refresh App Update"
+              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-slate-800 rounded-full"
+            >
+              <RefreshCw className="w-5 h-5" />
+            </Button>
+
             <ThemeToggle />
 
             <Button 
@@ -205,6 +227,31 @@ const Navbar = () => {
             <a href="#menu" onClick={(e) => handleScroll(e, '#menu', 'menu')} className={`block text-center ${getNavClass('menu')}`}>Our Menu</a>
             <a href="#about" onClick={(e) => handleScroll(e, '#about', 'about')} className={`block text-center ${getNavClass('about')}`}>About Us</a>
             <a href="#contact" onClick={(e) => handleScroll(e, '#contact', 'contact')} className={`block text-center ${getNavClass('contact')}`}>Contact</a>
+            
+            <Button 
+              onClick={() => {
+                const promptEvent = (window as any).deferredPwaPrompt;
+                if (promptEvent) {
+                  promptEvent.prompt();
+                } else {
+                  alert('📲 To Install SeaKart App:\n\n• Android (Chrome): Tap 3 dots ⋮ at top right → Tap "Add to Home screen" or "Install App".\n• iPhone (Safari): Tap Share button → Tap "Add to Home Screen".');
+                }
+              }} 
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white gap-2 rounded-full font-bold flex items-center justify-center shadow-md shadow-emerald-500/20"
+            >
+              <Download className="w-4 h-4" />
+              📲 Install SeaKart App
+            </Button>
+
+            <Button 
+              onClick={forceAppUpdate} 
+              variant="outline" 
+              className="w-full text-blue-600 border-blue-200 gap-2 rounded-full font-bold flex items-center justify-center"
+            >
+              <RefreshCw className="w-4 h-4" />
+              ⚡ Force Refresh App Update
+            </Button>
+
             <Button className="w-full bg-blue-600 text-white gap-2 rounded-full font-bold mt-2" asChild>
               <a href="tel:9380382950">
                 <Phone className="w-4 h-4" />

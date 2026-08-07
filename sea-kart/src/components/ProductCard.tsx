@@ -254,15 +254,6 @@ const ProductCard = ({ product }: ProductCardProps) => {
                 <Info className="w-4 h-4" />
               </Button>
             </div>
-            <Button 
-              onClick={handleOrderNow}
-              variant="secondary"
-              disabled={product.isOutOfStock}
-              className="w-full bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/40 border border-green-100 dark:border-green-900/50 rounded-xl gap-2 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <PhoneCall className="w-4 h-4" />
-              Order Now via WhatsApp
-            </Button>
           </div>
         </div>
       </div>

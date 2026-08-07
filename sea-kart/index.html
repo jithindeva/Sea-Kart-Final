@@ -3,6 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <title>Sea Kart</title>
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#2563eb" />
@@ -13,10 +16,28 @@
   <body>
     <div id="root"></div>
     <script>
+      // Register Service Worker for PWABuilder & PWA installation
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW registration failed:', err));
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('ServiceWorker registered:', reg.scope))
+            .catch(err => console.log('ServiceWorker error:', err));
         });
+      }
+    </script>
+    <script>
+      // Installed PWA App Auto-Updater (v2.0.3)
+      const CURRENT_APP_VERSION = '2.0.3-gmail-passwordless';
+      const storedVersion = localStorage.getItem('seakart_app_version');
+
+      if (storedVersion !== CURRENT_APP_VERSION) {
+        localStorage.setItem('seakart_app_version', CURRENT_APP_VERSION);
+        if ('caches' in window) {
+          caches.keys().then(names => {
+            for (let name of names) caches.delete(name);
+          });
+        }
+        window.location.reload(true);
       }
     </script>
     <script type="module" src="/src/main.tsx"></script>
