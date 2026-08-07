@@ -209,12 +209,50 @@ const Dashboard = () => {
             </Button>
           </div>
 
+          {/* Mobile Top Navigation Tabs */}
+          <div className="flex lg:hidden overflow-x-auto gap-2 pb-3 mb-6 scrollbar-none border-b border-slate-200 dark:border-slate-800">
+            <button 
+              onClick={() => setActiveTab('orders')}
+              className={`flex-shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-bold transition-all ${
+                activeTab === 'orders' ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800'
+              }`}
+            >
+              <Package className="w-3.5 h-3.5" />
+              My Orders ({safeUserOrders.length})
+            </button>
+            <button 
+              onClick={() => setActiveTab('wishlist')}
+              className={`flex-shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-bold transition-all ${
+                activeTab === 'wishlist' ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800'
+              }`}
+            >
+              <Heart className="w-3.5 h-3.5" />
+              Wishlist ({wishlistedProducts.length})
+            </button>
+            <button 
+              onClick={() => setActiveTab('settings')}
+              className={`flex-shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-bold transition-all ${
+                activeTab === 'settings' ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800'
+              }`}
+            >
+              <Settings className="w-3.5 h-3.5" />
+              Settings
+            </button>
+            <button 
+              onClick={handleLogout}
+              className="flex-shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-bold bg-red-50 dark:bg-red-950/30 text-red-600 border border-red-200 dark:border-red-900/50"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              Logout
+            </button>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             
-            {/* Sidebar */}
-            <div className="lg:col-span-1 space-y-6 sticky top-28 self-start">
+            {/* Desktop Sidebar / Mobile Profile Summary */}
+            <div className="lg:col-span-1 space-y-6 lg:sticky lg:top-28 self-start">
               <Card className="border-none shadow-sm rounded-[32px] overflow-hidden bg-white dark:bg-slate-900">
-                <CardContent className="p-6 text-center">
+                <CardContent className="p-5 sm:p-6 text-center">
                   {/* Clickable Profile Avatar to Upload from Gallery */}
                   <div 
                     onClick={() => fileInputRef.current?.click()}
@@ -238,7 +276,7 @@ const Dashboard = () => {
                   </div>
 
                   <h2 className="text-lg font-bold text-blue-950 dark:text-white">{currentUser.name}</h2>
-                  <p className="text-xs text-slate-500 mb-2">{currentUser.email}</p>
+                  <p className="text-xs text-slate-500 mb-2 truncate max-w-[200px] mx-auto">{currentUser.email}</p>
                   
                   <button 
                     onClick={() => fileInputRef.current?.click()}
@@ -258,7 +296,8 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
 
-              <div className="bg-white dark:bg-slate-900 rounded-[32px] p-4 shadow-sm border border-slate-200 dark:border-slate-800">
+              {/* Desktop Only Sidebar Navigation */}
+              <div className="hidden lg:block bg-white dark:bg-slate-900 rounded-[32px] p-4 shadow-sm border border-slate-200 dark:border-slate-800">
                 <nav className="space-y-2 text-xs">
                   <button 
                     onClick={() => setActiveTab('orders')}
@@ -306,12 +345,12 @@ const Dashboard = () => {
               {/* Orders Tab */}
               {activeTab === 'orders' && (
                 <div className="space-y-6">
-                  <h2 className="text-2xl font-bold text-blue-950 dark:text-white">Order History</h2>
+                  <h2 className="text-xl sm:text-2xl font-bold text-blue-950 dark:text-white">Order History</h2>
                   {safeUserOrders.length === 0 ? (
-                    <Card className="border-none shadow-sm rounded-[32px] text-center p-12 bg-white dark:bg-slate-900">
+                    <Card className="border-none shadow-sm rounded-[32px] text-center p-8 sm:p-12 bg-white dark:bg-slate-900">
                       <ShoppingBag className="w-16 h-16 mx-auto mb-4 text-blue-200" />
                       <h3 className="text-lg font-bold text-blue-950 dark:text-white mb-2">No orders placed yet</h3>
-                      <p className="text-slate-500 mb-6">Explore our menu and place your first fresh seafood order.</p>
+                      <p className="text-slate-500 mb-6 text-sm">Explore our menu and place your first fresh seafood order.</p>
                       <Button onClick={() => navigate('/#menu')} className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl">
                         Browse Menu
                       </Button>
@@ -325,19 +364,19 @@ const Dashboard = () => {
                       const isCancelable = !isDeliveredOrCancelled && ((currentTime - (order?.timestamp || currentTime)) < (5 * 60 * 1000));
 
                       return (
-                        <Card key={order.id} className="border-none shadow-sm rounded-[32px] overflow-hidden mb-6 bg-white dark:bg-slate-900">
-                          <CardHeader className="bg-blue-50/50 dark:bg-slate-800/50 p-6 flex flex-row items-center justify-between border-b border-blue-50 dark:border-slate-800">
+                        <Card key={order.id} className="border-none shadow-sm rounded-[24px] sm:rounded-[32px] overflow-hidden mb-6 bg-white dark:bg-slate-900">
+                          <CardHeader className="bg-blue-50/50 dark:bg-slate-800/50 p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-blue-50 dark:border-slate-800">
                             <div>
-                              <div className="flex items-center gap-3 mb-1">
-                                <CardTitle className="text-lg font-bold text-blue-950 dark:text-white">{order.id}</CardTitle>
+                              <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-1">
+                                <CardTitle className="text-base sm:text-lg font-bold text-blue-950 dark:text-white">{order.id}</CardTitle>
                                 <Badge 
                                   variant="secondary"
                                   className={
                                     displayStatus === 'Delivered' 
-                                      ? 'bg-emerald-100 text-emerald-800 border-emerald-200' 
+                                      ? 'bg-emerald-100 text-emerald-800 border-emerald-200 text-[10px] sm:text-xs' 
                                       : displayStatus === 'CANCELLED'
-                                      ? 'bg-red-100 text-red-800 border-red-200'
-                                      : 'bg-blue-100 text-blue-800 border-blue-200'
+                                      ? 'bg-red-100 text-red-800 border-red-200 text-[10px] sm:text-xs'
+                                      : 'bg-blue-100 text-blue-800 border-blue-200 text-[10px] sm:text-xs'
                                   }
                                 >
                                   {displayStatus}
@@ -359,14 +398,14 @@ const Dashboard = () => {
                               )}
                             </div>
 
-                            <div className="flex flex-col items-end gap-2">
-                              <span className="text-xl font-bold text-blue-900 dark:text-blue-400">{order.total}</span>
+                            <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200/60 dark:border-slate-700">
+                              <span className="text-lg sm:text-xl font-bold text-blue-900 dark:text-blue-400">{order.total}</span>
                               <div className="flex items-center gap-2">
                                 <Button
                                   size="sm"
                                   variant="outline"
                                   onClick={() => handleReorder(order)}
-                                  className="rounded-xl border-blue-200 text-blue-600 hover:bg-blue-50 gap-1.5 text-xs font-bold"
+                                  className="rounded-xl border-blue-200 text-blue-600 hover:bg-blue-50 gap-1.5 text-xs font-bold px-3 py-1.5 h-8"
                                 >
                                   <RotateCcw className="w-3.5 h-3.5" /> Reorder
                                 </Button>
@@ -376,7 +415,7 @@ const Dashboard = () => {
                                   <Button
                                     size="sm"
                                     onClick={() => navigate(`/track-order/${order.id}`)}
-                                    className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white gap-1.5 text-xs font-bold"
+                                    className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white gap-1.5 text-xs font-bold px-3 py-1.5 h-8"
                                   >
                                     <Truck className="w-3.5 h-3.5" /> Track Order
                                   </Button>
@@ -411,15 +450,15 @@ const Dashboard = () => {
 
                             {/* Cancel Order button is ONLY shown within 5 minutes of placement and if NOT delivered/cancelled */}
                             {isCancelable && (
-                              <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                              <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                                 <p className="text-xs text-amber-600 font-semibold flex items-center gap-1">
-                                  <Clock className="w-3.5 h-3.5" /> Order can be cancelled within 5 minutes of placement.
+                                  <Clock className="w-3.5 h-3.5 flex-shrink-0" /> Order can be cancelled within 5 minutes of placement.
                                 </p>
                                 <Button 
                                   variant="destructive" 
                                   size="sm" 
                                   onClick={() => cancelOrder(order.id)}
-                                  className="rounded-xl font-bold text-xs shadow-sm"
+                                  className="rounded-xl font-bold text-xs shadow-sm w-full sm:w-auto"
                                 >
                                   Cancel Order
                                 </Button>

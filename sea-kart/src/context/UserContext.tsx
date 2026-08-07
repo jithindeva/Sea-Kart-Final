@@ -77,7 +77,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     return data;
   };
 
-  const fetchWithTimeout = async (url: string, options: RequestInit = {}, timeoutMs = 12000) => {
+  const fetchWithTimeout = async (url: string, options: RequestInit = {}, timeoutMs = 60000) => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
     try {

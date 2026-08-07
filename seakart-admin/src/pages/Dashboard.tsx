@@ -195,6 +195,54 @@ export default function Dashboard() {
         .search-input { transition: border-color 0.2s, box-shadow 0.2s; }
         .search-input:focus { border-color: #3b82f6 !important; box-shadow: 0 0 0 3px rgba(59,130,246,0.2); outline: none; }
         .tab-animate { animation: tabFade 0.25s ease-out both; }
+        
+        @media (max-width: 900px) {
+          .admin-layout {
+            flex-direction: column !important;
+          }
+          .admin-sidebar {
+            width: 100% !important;
+            position: relative !important;
+            height: auto !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important;
+          }
+          .admin-brand {
+            padding: 16px !important;
+          }
+          .admin-nav-container {
+            padding: 8px 12px !important;
+          }
+          .admin-nav-label {
+            display: none !important;
+          }
+          .admin-nav-list {
+            flex-direction: row !important;
+            overflow-x: auto !important;
+            gap: 8px !important;
+            padding-bottom: 4px !important;
+          }
+          .nav-btn {
+            width: auto !important;
+            flex-shrink: 0 !important;
+            padding: 10px 14px !important;
+          }
+          .admin-user-box {
+            display: none !important;
+          }
+          .admin-main-content {
+            margin-left: 0 !important;
+            padding: 16px !important;
+            padding-top: 20px !important;
+          }
+          .stats-container {
+            flex-wrap: wrap !important;
+          }
+          .card-stat {
+            flex: 1 1 calc(33% - 8px) !important;
+            min-width: 100px !important;
+            padding: 8px 12px !important;
+          }
+        }
       `}</style>
 
       {/* ── Animated top rainbow bar ── */}
@@ -206,14 +254,14 @@ export default function Dashboard() {
       }} />
 
       {/* ── SIDEBAR ── */}
-      <div style={{
+      <div className="admin-sidebar" style={{
         width: '256px', background: 'linear-gradient(180deg, #0f172a 0%, #1e293b 100%)',
         color: '#94a3b8', display: 'flex', flexDirection: 'column', position: 'fixed',
         height: '100%', zIndex: 10, boxShadow: '4px 0 20px rgba(0,0,0,0.3)',
         paddingTop: '4px'
       }}>
         {/* Brand */}
-        <div style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: '12px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+        <div className="admin-brand" style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: '12px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
           <div style={{
             width: '44px', height: '44px', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center',
             background: 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)',
@@ -228,11 +276,11 @@ export default function Dashboard() {
         </div>
 
         {/* Nav */}
-        <div style={{ padding: '16px', flex: 1 }}>
-          <div style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(148,163,184,0.4)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '12px', paddingLeft: '12px' }}>
+        <div className="admin-nav-container" style={{ padding: '16px', flex: 1 }}>
+          <div className="admin-nav-label" style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(148,163,184,0.4)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '12px', paddingLeft: '12px' }}>
             Navigation
           </div>
-          <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <nav className="admin-nav-list" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             {navItems.map(item => (
               <button
                 key={item.id}
@@ -294,7 +342,7 @@ export default function Dashboard() {
             )}
           </button>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', borderRadius: '12px', background: 'rgba(255,255,255,0.04)', marginBottom: '8px' }}>
+          <div className="admin-user-box" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', borderRadius: '12px', background: 'rgba(255,255,255,0.04)', marginBottom: '8px' }}>
             <div style={{
               width: '38px', height: '38px', borderRadius: '50%', flexShrink: 0,
               background: 'linear-gradient(135deg, #3b82f6, #6366f1)',
@@ -334,7 +382,7 @@ export default function Dashboard() {
       </div>
 
       {/* ── MAIN CONTENT ── */}
-      <div style={{ flex: 1, marginLeft: '256px', padding: '32px', paddingTop: '36px' }}>
+      <div className="admin-main-content" style={{ flex: 1, marginLeft: '256px', padding: '32px', paddingTop: '36px' }}>
         {/* Page header */}
         <header style={{ marginBottom: '28px' }}>
           <div>
@@ -364,7 +412,7 @@ export default function Dashboard() {
 
           {/* Quick stats for orders */}
           {activeTab === 'orders' && (
-            <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+            <div className="stats-container" style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
               {[
                 { label: 'Total Orders', value: totalOrders, color: '#3b82f6', bg: isDark ? 'rgba(59,130,246,0.15)' : 'rgba(59,130,246,0.08)' },
                 { label: 'Delivered', value: deliveredOrders, color: '#10b981', bg: isDark ? 'rgba(16,185,129,0.15)' : 'rgba(16,185,129,0.08)' },

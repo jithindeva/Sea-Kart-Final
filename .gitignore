@@ -5,19 +5,44 @@ node_modules/
 # Local databases & storage
 mongodb_data/
 **/mongodb_data/
+*.db
+*.sqlite
+*.sqlite3
+backend/prisma/*.db
 
 # Build outputs
 dist/
 **/dist/
 build/
 **/build/
+dist-ssr/
+**/dist-ssr/
 
 # Environment files & secrets
 .env
+.env.*
+!.env.example
+!.env.template
 **/.env
-.env.local
-.env.production
+**/.env.*
+!**/.env.example
+!**/.env.template
+
+# Private key files
+*.pem
+*.key
+*.crt
 
 # System files & logs
 .DS_Store
+Thumbs.db
 *.log
+logs/
+
+# Editor & AI metadata folders
+.vscode/
+.idea/
+.dyad/
+.claude/
+.agents/
+.windsurf/
