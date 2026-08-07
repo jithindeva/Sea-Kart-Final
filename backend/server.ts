@@ -256,11 +256,24 @@ app.get('/api/admin/orders', authMiddleware, adminMiddleware, async (req: any, r
     const skip = (page - 1) * limit;
 
     const totalOrders = await Order.countDocuments();
-    const orders = await Order.find()
+    const rawOrders = await Order.find()
       .sort({ timestamp: -1 })
       .skip(skip)
       .limit(limit)
       .populate('user', 'name email phone address');
+
+    const orders = rawOrders.map((o: any) => {
+      const doc = o.toObject();
+      return {
+        ...doc,
+        user: {
+          name: doc.user?.name || doc.userName || 'Customer',
+          email: doc.user?.email || doc.userEmail || 'customer@gmail.com',
+          phone: doc.user?.phone || doc.userPhone || '',
+          address: doc.user?.address || doc.address || ''
+        }
+      };
+    });
 
     res.json({
       data: orders,
@@ -558,9 +571,13 @@ app.post('/api/orders', authMiddleware, async (req: any, res: any) => {
   try {
     const { items, total, paymentMethod, deliverySlot, address } = req.body;
     const orderId = await generateUniqueOrderId();
+    const currentUser = await User.findById(req.userId);
     const order = new Order({
       id: orderId,
       user: req.userId,
+      userEmail: currentUser?.email || 'customer@gmail.com',
+      userName: currentUser?.name || 'Customer',
+      userPhone: currentUser?.phone || '',
       items,
       total,
       paymentMethod,

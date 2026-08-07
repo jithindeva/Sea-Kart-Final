@@ -509,11 +509,11 @@ export default function AdminDashboardView() {
                         <tr key={order._id} className="table-row" style={{ borderBottom: `1px solid ${colors.cardBorder}` }}>
                           <td style={{ padding: '14px 16px', fontWeight: 700, color: '#3b82f6', fontSize: '13px', whiteSpace: 'nowrap' }}>{order.id}</td>
                           <td style={{ padding: '14px 16px' }}>
-                            <div style={{ fontWeight: 600, color: colors.textTitle, fontSize: '13px' }}>{order.user?.name || 'Unknown'}</div>
-                            <div style={{ fontSize: '12px', color: colors.textSub }}>{order.user?.email}</div>
-                            {order.user?.phone && (
-                              <a href={`tel:${order.user.phone}`} style={{ fontSize: '11px', color: '#94a3b8', textDecoration: 'none', display: 'block', marginTop: '2px' }}>
-                                📞 {order.user.phone}
+                            <div style={{ fontWeight: 600, color: colors.textTitle, fontSize: '13px' }}>{order.user?.name || order.userName || 'Customer'}</div>
+                            <div style={{ fontSize: '12px', color: colors.textSub }}>{order.user?.email || order.userEmail || 'customer@gmail.com'}</div>
+                            {(order.user?.phone || order.userPhone) && (
+                              <a href={`tel:${order.user?.phone || order.userPhone}`} style={{ fontSize: '11px', color: '#94a3b8', textDecoration: 'none', display: 'block', marginTop: '2px' }}>
+                                📞 {order.user?.phone || order.userPhone}
                               </a>
                             )}
                           </td>

@@ -1,5 +1,5 @@
-// SeaKart Service Worker - v2.4 (Mobile Razorpay Iframe Fix)
-const CACHE_NAME = 'seakart-v2.4';
+// SeaKart Service Worker - v2.5 (Mobile Payment & Admin Email Sync Update)
+const CACHE_NAME = 'seakart-v2.5';
 
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
