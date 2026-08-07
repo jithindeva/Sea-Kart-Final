@@ -35,19 +35,12 @@
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
@@ -79,6 +72,7 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
+
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -95,64 +89,95 @@
     @apply border-border;
   }
 
+  /* ── Global Performance: smooth 60fps for laptop & Android ── */
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
   body {
     @apply bg-background text-foreground;
+    /* Prevent CLS from scrollbar appearing/disappearing */
+    overflow-y: scroll;
+    /* Hardware-accelerated smooth scrolling on Android WebView */
+    -webkit-overflow-scrolling: touch;
+    /* Prevent over-scroll bounce causing layout recalc */
+    overscroll-behavior-y: contain;
+  }
+
+  /* Zero-latency tap response on all interactive elements */
+  button, a, [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    cursor: pointer;
+  }
+
+  input, select, textarea {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
 }
 
-/* Custom Animations */
+/* ─── Marquee ──────────────────────────────────────────────────────────────── */
 @keyframes marquee {
-  0% { transform: translateX(100%); }
+  0%   { transform: translateX(100%); }
   100% { transform: translateX(-100%); }
 }
 
 .animate-marquee {
   animation: marquee 20s linear infinite;
+  will-change: transform;
 }
 
+/* ─── Animated Background Gradient ────────────────────────────────────────── */
 @keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
 
+/* GPU-composited layer: never blocks main thread painting */
 .bg-animated-mesh {
   background: linear-gradient(-45deg, #f0f9ff, #e0f2fe, #cffafe, #e0e7ff);
   background-size: 400% 400%;
-  animation: gradientShift 15s ease infinite;
+  animation: gradientShift 25s ease infinite;
   will-change: background-position;
   transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .dark .bg-animated-mesh {
   background: linear-gradient(-45deg, #020617, #0f172a, #082f49, #1e1b4b);
   background-size: 400% 400%;
-  animation: gradientShift 15s ease infinite;
+  animation: gradientShift 25s ease infinite;
   will-change: background-position;
   transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
-/* Smooth Scrolling & GPU Acceleration */
-html, body {
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
+/* Disable heavy animation for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .bg-animated-mesh,
+  .dark .bg-animated-mesh {
+    animation: none;
+    background-size: 100% 100%;
+  }
+  .animate-marquee {
+    animation: none;
+  }
 }
 
-* {
-  -webkit-tap-highlight-color: transparent;
-}
-
+/* ─── Pulse Animation ──────────────────────────────────────────────────────── */
 @keyframes pulse-slow {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.85; }
+  50%       { opacity: 0.85; }
 }
 .animate-pulse-slow {
   animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Custom Scrollbar */
+/* ─── Custom Scrollbar ─────────────────────────────────────────────────────── */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
 }
@@ -160,15 +185,14 @@ html, body {
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #cbd5e1; /* slate-300 */
+  background-color: #cbd5e1;
   border-radius: 20px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: #94a3b8; /* slate-400 */
+  background-color: #94a3b8;
 }
 
-/* ─── Date / Time native input icon colors ───────────────────────────────── */
-/* Light mode: dark blue icons to match brand */
+/* ─── Date / Time native input icon colors ─────────────────────────────────── */
 input[type="date"]::-webkit-calendar-picker-indicator,
 input[type="time"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
@@ -181,7 +205,6 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   opacity: 1;
 }
 
-/* Dark mode: white icons */
 .dark input[type="date"]::-webkit-calendar-picker-indicator,
 .dark input[type="time"]::-webkit-calendar-picker-indicator {
   filter: invert(1) brightness(2);

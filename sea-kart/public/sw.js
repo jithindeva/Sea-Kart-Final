@@ -1,4 +1,4 @@
-// SeaKart Service Worker - v3.0 (Smoothness Optimization & Zero Lag Update)
+// SeaKart Service Worker - v3.0 (Smooth Performance & Mobile UX)
 const CACHE_NAME = 'seakart-v3.0';
 
 self.addEventListener('message', (event) => {

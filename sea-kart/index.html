@@ -2,10 +2,13 @@
 <html lang="en" class="scroll-smooth">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>Sea Kart</title>
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#2563eb" />
@@ -26,9 +29,19 @@
       }
     </script>
     <script>
-      // Installed PWA Version Sync
-      const CURRENT_APP_VERSION = '2.0.4-smooth';
-      localStorage.setItem('seakart_app_version', CURRENT_APP_VERSION);
+      // Installed PWA App Auto-Updater (v2.0.3)
+      const CURRENT_APP_VERSION = '2.0.4-smooth-perf';
+      const storedVersion = localStorage.getItem('seakart_app_version');
+
+      if (storedVersion !== CURRENT_APP_VERSION) {
+        localStorage.setItem('seakart_app_version', CURRENT_APP_VERSION);
+        if ('caches' in window) {
+          caches.keys().then(names => {
+            for (let name of names) caches.delete(name);
+          });
+        }
+        window.location.reload(true);
+      }
     </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
