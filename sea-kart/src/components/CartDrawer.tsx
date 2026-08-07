@@ -191,19 +191,23 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
       const razorpayKey = order?.key || (import.meta.env as any).VITE_RAZORPAY_KEY_ID || 'rzp_test_TIDWCx3F9hY5RS';
       const orderAmountPaise = order?.amount || Math.round(amount * 100);
 
-      const options = {
+      const options: any = {
         key: razorpayKey,
         amount: orderAmountPaise,
         currency: 'INR',
         name: 'Sea Kart',
         description: 'Fresh Seafood Delivery',
-        order_id: orderId || undefined,
         modal: {
           ondismiss: () => {
             setProcessingState('IDLE');
             onOpenChange(true);
             toast.info('Razorpay payment window closed.');
           },
+          escape: true,
+          backdropclose: true
+        },
+        retry: {
+          enabled: true
         },
         handler: async (response: any) => {
           try {
@@ -264,6 +268,10 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
         },
         theme: { color: '#2563eb' },
       };
+
+      if (orderId) {
+        options.order_id = orderId;
+      }
 
       const rzp = new (window as any).Razorpay(options);
       rzp.on('payment.failed', (response: any) => {
