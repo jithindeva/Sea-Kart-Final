@@ -26,6 +26,7 @@
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.1",
+    "sea-kart-better-root": "file:..",
     "sonner": "^2.0.7"
   }
 }
