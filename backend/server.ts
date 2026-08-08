@@ -124,6 +124,36 @@ app.options('*', cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
+// Root Status & Health Check Routes
+app.get('/', (req: any, res: any) => {
+  res.status(200).send(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Sea-Kart Cloud Server</title>
+        <style>
+          body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: white; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+          .card { background: #1e293b; padding: 40px; border-radius: 24px; text-align: center; max-width: 480px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); border: 1px solid #334155; }
+          .badge { background: #10b981; color: white; padding: 6px 16px; border-radius: 99px; font-weight: 700; font-size: 14px; display: inline-block; margin-bottom: 20px; }
+          h1 { margin: 0 0 10px 0; color: #38bdf8; }
+          p { color: #94a3b8; font-size: 14px; line-height: 1.6; }
+        </style>
+      </head>
+      <body>
+        <div class="card">
+          <div class="badge">✓ SERVER ONLINE</div>
+          <h1>Sea-Kart Backend Cloud API</h1>
+          <p>The Render cloud server is active and connected to MongoDB.</p>
+        </div>
+      </body>
+    </html>
+  `);
+});
+
+app.get('/api/health', (req: any, res: any) => {
+  res.json({ status: 'ok', online: true, timestamp: new Date().toISOString() });
+});
+
 // Connect to MongoDB with High-Concurrency Connection Pooling
 mongoose.connect(MONGO_URI, {
   maxPoolSize: 100,
