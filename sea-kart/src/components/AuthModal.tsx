@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { X, ShieldCheck, Lock } from 'lucide-react';
+import React, { useState, useEffect, useRef, ErrorInfo } from 'react';
+import { X, ShieldCheck, Lock, AlertCircle } from 'lucide-react';
 import { useGoogleLogin } from '@react-oauth/google';
 import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
@@ -11,7 +11,32 @@ interface AuthModalProps {
   onClose: () => void;
 }
 
-const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
+class ModalErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean, error: any}> {
+  constructor(props: any) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error: any) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error("AuthModal Error:", error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="bg-white rounded-3xl p-8 w-full max-w-sm relative shadow-2xl flex flex-col items-center">
+          <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
+          <h2 className="text-xl font-bold text-red-600 mb-2">Something went wrong</h2>
+          <p className="text-sm text-slate-500 text-center">Please refresh the page and try again.</p>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+const AuthModalContent: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   const { googleLogin } = useUser();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -43,10 +68,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           await googleLogin(profile.email, '');
           toast.success(`Welcome ${profile.name || profile.email}! Verified by Google.`);
           
-          // Fix for Android/Mobile: Remove the scroll lock immediately before scrolling
           document.body.style.overflow = 'unset';
           onClose();
-          // Hard redirect to ensure Android resets scroll position and starts fresh from home
           window.location.href = '/';
         } else {
           toast.error('Google verification failed. Unverified account.');
@@ -67,42 +90,14 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        width: '100%',
-        height: '100%',
-        zIndex: 99999,
-        background: 'rgba(0,0,0,0.65)',
-        backdropFilter: 'blur(8px)',
-        WebkitBackdropFilter: 'blur(8px)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '16px',
-        boxSizing: 'border-box',
-      }}
+    <div 
+      className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md transition-opacity duration-300"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div
-        style={{
-          background: '#ffffff',
-          borderRadius: '24px',
-          padding: '32px',
-          width: '100%',
-          maxWidth: '400px',
-          position: 'relative',
-          boxShadow: '0 25px 60px rgba(0,0,0,0.35)',
-          border: '1px solid rgba(0,0,0,0.08)',
-        }}
-      >
+      <div className="bg-white rounded-[24px] p-8 w-full max-w-[400px] relative shadow-2xl z-[100000] border border-slate-100 transform transition-all scale-100 opacity-100">
         <button 
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
+          className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors z-10"
         >
           <X className="w-5 h-5" />
         </button>
@@ -124,7 +119,6 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           </p>
         </div>
 
-        {/* Security Reassurance Banner */}
         <div className="mb-6 bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-start gap-3">
           <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
           <div className="text-xs text-emerald-800 leading-relaxed">
@@ -132,7 +126,6 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           </div>
         </div>
 
-        {/* Primary Official Google Popup Button — auto-scrolled into view on mobile */}
         <div className="space-y-4">
           <Button 
             ref={googleBtnRef}
@@ -161,4 +154,11 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   );
 };
 
+const AuthModal: React.FC<AuthModalProps> = (props) => (
+  <ModalErrorBoundary>
+    <AuthModalContent {...props} />
+  </ModalErrorBoundary>
+);
+
 export default AuthModal;
+
