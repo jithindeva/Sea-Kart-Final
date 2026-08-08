@@ -42,9 +42,16 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         if (profile && profile.email) {
           await googleLogin(profile.email, '');
           toast.success(`Welcome ${profile.name || profile.email}! Verified by Google.`);
+          
+          // Fix for Android/Mobile: Remove the scroll lock immediately before scrolling
+          document.body.style.overflow = 'unset';
           onClose();
           navigate('/');
-          window.scrollTo({ top: 0, behavior: 'smooth' });
+          
+          // Small delay to ensure the DOM has updated and is ready to scroll
+          setTimeout(() => {
+            window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+          }, 100);
         } else {
           toast.error('Google verification failed. Unverified account.');
         }
