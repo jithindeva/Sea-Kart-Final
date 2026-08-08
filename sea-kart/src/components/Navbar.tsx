@@ -74,11 +74,7 @@ const Navbar = () => {
 
   const handleLogout = () => {
     setIsDropdownOpen(false);
-    // Scroll to the bottom of the page smoothly so user can see the logout confirmation
-    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-    setTimeout(() => {
-      setIsLogoutModalOpen(true);
-    }, 400);
+    setIsLogoutModalOpen(true);
   };
 
   const confirmLogout = () => {
