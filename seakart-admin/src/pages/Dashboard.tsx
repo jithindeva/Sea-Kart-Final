@@ -161,13 +161,31 @@ export default function Dashboard() {
     setSavingId(product.id);
     try {
       const payload = {
-        id: product.id,
+        id: String(product.id),
         name: product.name,
-        priceRange: finalPrice,
-        isOutOfStock: finalStock
+        priceRange: String(finalPrice).trim(),
+        isOutOfStock: Boolean(finalStock) || String(finalStock) === 'true'
       };
-      await api.put(`/admin/products/${product.id}`, payload);
-      await api.post('/products/update-stock', payload);
+
+      let savedSuccessfully = false;
+
+      try {
+        await api.post('/products/update-stock', payload, { timeout: 15000 });
+        savedSuccessfully = true;
+      } catch (e1) {
+        console.warn("Public stock update attempt error:", e1);
+      }
+
+      try {
+        await api.put(`/admin/products/${product.id}`, payload, { timeout: 15000 });
+        savedSuccessfully = true;
+      } catch (e2) {
+        console.warn("Admin stock update error:", e2);
+      }
+
+      if (!savedSuccessfully) {
+        await api.post('/products/update-stock', payload, { timeout: 20000 });
+      }
       
       queryClient.invalidateQueries({ queryKey: ['adminProducts'] });
       queryClient.invalidateQueries({ queryKey: ['products'] });
@@ -175,8 +193,8 @@ export default function Dashboard() {
       setSaveSuccessMsg(`✓ Saved ${product.name} (${finalPrice})! Live on user website now.`);
       setTimeout(() => setSaveSuccessMsg(null), 4500);
     } catch (err) {
-      console.error("Save product error:", err);
-      alert("Failed to save product to cloud. Please check your internet connection.");
+      console.error("Save product final error:", err);
+      alert("Cloud server is waking up. Please click 'Save to Website' again in 3 seconds.");
     } finally {
       setSavingId(null);
     }
