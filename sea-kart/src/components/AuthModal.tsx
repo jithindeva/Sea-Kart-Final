@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { X, ShieldCheck, Lock } from 'lucide-react';
 import { useGoogleLogin } from '@react-oauth/google';
 import { useNavigate } from 'react-router-dom';
+import { createPortal } from 'react-dom';
 import { Button } from './ui/button';
 import { useUser } from '@/context/UserContext';
 import { toast } from 'sonner';
@@ -28,43 +29,15 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     };
   }, [isOpen]);
 
-  const triggerGooglePopup = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      setLoading(true);
-      try {
-        const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-        });
-        const profile = await res.json();
-        
-        if (profile && profile.email) {
-          await googleLogin(profile.email, '');
-          toast.success(`Welcome ${profile.name || profile.email}! Verified by Google.`);
-          
-          document.body.style.overflow = 'unset';
-          onClose();
-          window.location.href = '/';
-        } else {
-          toast.error('Google verification failed. Unverified account.');
-        }
-      } catch (err: any) {
-        toast.error('Google account verification failed.');
-      } finally {
-        setLoading(false);
-      }
-    },
-    onError: (err) => {
-      console.log('Google login error:', err);
-      toast.error('Google Popup blocked. Please allow popups.');
-      setLoading(false);
-    }
-  });
+  const triggerGooglePopup = () => {
+    alert("Google popup disabled for debugging");
+  };
 
   if (!isOpen) return null;
 
-  return (
+  const modalContent = (
     <div
-      className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
+      className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md transition-opacity duration-300"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl rounded-[24px] p-8 w-full max-w-[400px] relative animate-in fade-in zoom-in-95 duration-200">
@@ -125,6 +98,11 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       </div>
     </div>
   );
+
+  if (typeof document !== 'undefined') {
+    return createPortal(modalContent, document.body);
+  }
+  return modalContent;
 };
 
 export default AuthModal;
