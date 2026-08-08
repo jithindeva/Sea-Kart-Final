@@ -4,8 +4,10 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, ShieldCheck, Truck, Sparkles } from 'lucide-react';
+import { useUser } from '@/context/UserContext';
 
 const Hero = () => {
+  const { isLoggedIn } = useUser();
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -69,10 +71,20 @@ const Hero = () => {
             className="flex flex-col sm:flex-row items-center gap-4 justify-center"
           >
             <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-6 text-lg rounded-full gap-2 shadow-xl shadow-blue-500/30 font-bold transition-all hover:scale-105" asChild>
-              <a href="#menu">Order Now <ArrowRight className="w-5 h-5" /></a>
+              <a href="#menu" onClick={(e) => {
+                if (!isLoggedIn) {
+                  e.preventDefault();
+                  window.dispatchEvent(new Event('open-login'));
+                }
+              }}>Order Now <ArrowRight className="w-5 h-5" /></a>
             </Button>
             <Button size="lg" variant="outline" className="border-blue-200 text-slate-800 dark:text-white dark:border-blue-800 px-8 py-6 text-lg rounded-full hover:bg-blue-50 dark:hover:bg-slate-800 font-bold" asChild>
-              <a href="#menu">View Menu</a>
+              <a href="#menu" onClick={(e) => {
+                if (!isLoggedIn) {
+                  e.preventDefault();
+                  window.dispatchEvent(new Event('open-login'));
+                }
+              }}>View Menu</a>
             </Button>
           </motion.div>
 

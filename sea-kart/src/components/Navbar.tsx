@@ -49,6 +49,15 @@ const Navbar = () => {
     }
   }, [location.pathname]);
 
+  useEffect(() => {
+    const handleOpenLogin = () => {
+      window.scrollTo({ top: 0, behavior: 'auto' });
+      setIsAuthOpen(true);
+    };
+    window.addEventListener('open-login', handleOpenLogin);
+    return () => window.removeEventListener('open-login', handleOpenLogin);
+  }, []);
+
   const handleLogout = () => {
     setIsLogoutModalOpen(true);
   };
