@@ -29,9 +29,38 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     };
   }, [isOpen]);
 
-  const triggerGooglePopup = () => {
-    alert("Google popup disabled for debugging");
-  };
+  const triggerGooglePopup = useGoogleLogin({
+    prompt: 'select_account',
+    onSuccess: async (tokenResponse) => {
+      setLoading(true);
+      try {
+        const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+        });
+        const profile = await res.json();
+        
+        if (profile && profile.email) {
+          await googleLogin(profile.email, '');
+          toast.success(`Welcome ${profile.name || profile.email}! Verified by Google.`);
+          
+          document.body.style.overflow = 'unset';
+          onClose();
+          window.location.href = '/';
+        } else {
+          toast.error('Google verification failed. Unverified account.');
+        }
+      } catch (err: any) {
+        toast.error('Google account verification failed.');
+      } finally {
+        setLoading(false);
+      }
+    },
+    onError: (err) => {
+      console.log('Google login error:', err);
+      toast.error('Google Popup blocked. Please allow popups.');
+      setLoading(false);
+    }
+  });
 
   if (!isOpen) return null;
 
