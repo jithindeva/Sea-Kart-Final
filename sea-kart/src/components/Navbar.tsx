@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { ShoppingCart, Phone, Menu, X, User, LogIn, LogOut, RefreshCw, Download } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { ShoppingCart, Phone, Menu, X, User, LogIn, LogOut, RefreshCw, Download, ChevronDown, LayoutDashboard, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/CartContext';
 import { useUser } from '@/context/UserContext';
@@ -16,6 +16,9 @@ const Navbar = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -38,7 +41,18 @@ const Navbar = () => {
   });
 
   const { totalItems } = useCart();
-  const { isLoggedIn, logout } = useUser();
+  const { isLoggedIn, logout, user } = useUser();
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const p = location.pathname;
@@ -160,24 +174,64 @@ const Navbar = () => {
 
           <div className="flex items-center gap-3">
             {isLoggedIn ? (
-              <div className="flex items-center gap-3">
-                <Link 
-                  to="/dashboard" 
-                  onClick={() => setActiveNav('dashboard')}
-                  className={`hidden md:flex items-center gap-2 ${getNavClass('dashboard')}`}
+              <div className="relative" ref={dropdownRef}>
+                {/* Avatar Button */}
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-all group"
                 >
-                  <User className="w-4 h-4" />
-                  Dashboard
-                </Link>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={handleLogout}
-                  className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-full"
-                  title="Logout"
-                >
-                  <LogOut className="w-5 h-5" />
-                </Button>
+                  <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-md overflow-hidden border-2 border-blue-400">
+                    {user?.avatar ? (
+                      <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <span>{(user?.name || 'U')[0].toUpperCase()}</span>
+                    )}
+                  </div>
+                  <span className="hidden md:block text-sm font-semibold text-slate-700 dark:text-slate-200 max-w-[100px] truncate">{user?.name || 'Account'}</span>
+                  <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {/* Dropdown Panel */}
+                {isDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden z-[99999] animate-in fade-in slide-in-from-top-2 duration-150">
+                    {/* Profile Header */}
+                    <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-800 border-b border-slate-200 dark:border-slate-700">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-lg overflow-hidden border-2 border-blue-400 shadow-md">
+                          {user?.avatar ? (
+                            <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <span>{(user?.name || 'U')[0].toUpperCase()}</span>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-slate-900 dark:text-white text-sm truncate">{user?.name || 'User'}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{user?.email || ''}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Menu Items */}
+                    <div className="p-2">
+                      <Link
+                        to="/dashboard"
+                        onClick={() => { setIsDropdownOpen(false); setActiveNav('dashboard'); }}
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors text-sm font-medium"
+                      >
+                        <LayoutDashboard className="w-4 h-4 text-blue-500" />
+                        My Dashboard
+                      </Link>
+
+                      <button
+                        onClick={() => { setIsDropdownOpen(false); handleLogout(); }}
+                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors text-sm font-bold mt-1"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Logout
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <Button 
