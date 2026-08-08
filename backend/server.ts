@@ -14,8 +14,8 @@ import nodemailer from 'nodemailer';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const MONGO_URI = process.env.DATABASE_URL || 'mongodb://127.0.0.1:27017/seakart';
-const JWT_SECRET = 'supersecretjwtkey'; // In production, move to .env
+const MONGO_URI = process.env.DATABASE_URL || 'mongodb+srv://jithindeva12_db_user:Seakart1237@cluster0.juvzrg0.mongodb.net/seakart?retryWrites=true&w=majority&appName=Cluster0';
+const JWT_SECRET = 'supersecretjwtkey';
 
 // ── Nodemailer Gmail Transporter Setup ──
 const gmailUser = process.env.GMAIL_USER || '';
