@@ -5,7 +5,13 @@ import { getApiBase } from '../config/api';
 
 export const fetchProducts = async (): Promise<Product[]> => {
   try {
-    const response = await fetch(`${getApiBase()}/api/products`);
+    const response = await fetch(`${getApiBase()}/api/products?t=${Date.now()}`, {
+      cache: 'no-store',
+      headers: {
+        'Pragma': 'no-cache',
+        'Cache-Control': 'no-cache, no-store, must-revalidate'
+      }
+    });
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }

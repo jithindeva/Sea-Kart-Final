@@ -21,6 +21,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
   const { addToCart, toggleWishlist, wishlist } = useCart();
   const { isLoggedIn } = useUser();
   const isWishlisted = wishlist.includes(product.id);
+  const isOutOfStock = Boolean(product.isOutOfStock) || String(product.isOutOfStock) === 'true';
   const [showReviews, setShowReviews] = useState(false);
 
   // Unit and weight selection directly on card
@@ -99,7 +100,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
           >
             <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
           </button>
-          {product.isOutOfStock && (
+          {isOutOfStock && (
             <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px] z-10 flex items-center justify-center">
               <Badge className="bg-slate-900 text-white border-none text-sm md:text-base py-1.5 px-4 shadow-xl">
                 Out of Stock
@@ -238,11 +239,11 @@ const ProductCard = ({ product }: ProductCardProps) => {
             <div className="flex gap-2">
               <Button 
                 onClick={handleAddToCart}
-                disabled={product.isOutOfStock}
+                disabled={isOutOfStock}
                 className="flex-1 bg-blue-600 hover:bg-blue-700 text-white rounded-xl gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-blue-500/20"
               >
                 <ShoppingCart className="w-4 h-4" />
-                {product.isOutOfStock ? 'Sold Out' : `Add (${getUnitLabel()})`}
+                {isOutOfStock ? 'Sold Out' : `Add (${getUnitLabel()})`}
               </Button>
               <Button
                 variant="outline"
