@@ -16,7 +16,28 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   const { googleLogin } = useUser();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [emailInput, setEmailInput] = useState('');
   const googleBtnRef = useRef<HTMLButtonElement>(null);
+
+  const handleDirectEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanEmail = emailInput.trim().toLowerCase();
+    if (!cleanEmail || !cleanEmail.includes('@')) {
+      toast.error('Please enter a valid Gmail or Email address.');
+      return;
+    }
+    setLoading(true);
+    try {
+      await googleLogin(cleanEmail, cleanEmail.split('@')[0], '', '');
+      toast.success(`Signed in as ${cleanEmail}`);
+      document.body.style.overflow = 'unset';
+      onClose();
+    } catch (err: any) {
+      toast.error(err.message || 'Sign in failed.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -126,8 +147,34 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
               <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
               <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
             </svg>
-            {loading ? 'Verifying with Google...' : 'Sign in with Google'}
+            {loading ? 'Verifying with Google...' : 'Sign in with Google One-Tap'}
           </Button>
+
+          <div className="relative flex items-center justify-center my-3">
+            <div className="border-t border-slate-200 dark:border-slate-800 w-full"></div>
+            <span className="bg-white dark:bg-slate-900 px-3 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider whitespace-nowrap">
+              Or Enter Gmail / Email
+            </span>
+            <div className="border-t border-slate-200 dark:border-slate-800 w-full"></div>
+          </div>
+
+          <form onSubmit={handleDirectEmailSubmit} className="space-y-2.5">
+            <input
+              type="email"
+              required
+              placeholder="Enter your Gmail (e.g. name@gmail.com)"
+              value={emailInput}
+              onChange={(e) => setEmailInput(e.target.value)}
+              className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <Button
+              type="submit"
+              disabled={loading || !emailInput.trim()}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl py-3 text-sm shadow-md transition-all"
+            >
+              {loading ? 'Signing In...' : 'Continue with Gmail →'}
+            </Button>
+          </form>
         </div>
 
         <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-center gap-2 text-xs text-slate-400 dark:text-slate-500">
