@@ -377,27 +377,62 @@ app.put('/api/admin/orders/:id/status', authMiddleware, adminMiddleware, async (
   }
 });
 
+const updateProductInDb = async (idParam: string, body: any) => {
+  const { priceRange, isOutOfStock, name, localName, category, image } = body;
+  const productId = String(idParam).trim();
+
+  const searchConditions: any[] = [
+    { id: productId },
+    { id: String(parseInt(productId) || productId) }
+  ];
+
+  if (mongoose.Types.ObjectId.isValid(productId)) {
+    searchConditions.push({ _id: productId });
+  }
+
+  if (name && typeof name === 'string') {
+    searchConditions.push({ name: new RegExp(`^${name.trim()}$`, 'i') });
+  }
+
+  // Fallback for ID 1 => Pink Perch, ID 2 => Sardine etc.
+  const knownNames: Record<string, string> = {
+    '1': 'Pink Perch',
+    '2': 'Sardine',
+    '3': 'Indian Mackerel',
+    '4': 'Reef Cod',
+    '5': 'King Fish',
+    '6': 'Silver Pomfret',
+    '7': 'Big Eye Snapper',
+    '8': 'Prawns',
+    '9': 'Crab'
+  };
+
+  if (knownNames[productId]) {
+    searchConditions.push({ name: new RegExp(`^${knownNames[productId]}$`, 'i') });
+  }
+
+  const updateFields: any = { id: productId };
+  if (priceRange !== undefined) updateFields.priceRange = String(priceRange).trim();
+  if (isOutOfStock !== undefined) updateFields.isOutOfStock = Boolean(isOutOfStock) || String(isOutOfStock) === 'true';
+  if (name) updateFields.name = name;
+  if (localName) updateFields.localName = localName;
+  if (category) updateFields.category = category;
+  if (image) updateFields.image = image;
+
+  const product = await Product.findOneAndUpdate(
+    { $or: searchConditions },
+    { $set: updateFields },
+    { new: true, upsert: true }
+  );
+
+  invalidateProductCache();
+  console.log(`[Product DB Updated] ID: ${productId}, Price: ${product.priceRange}, Stock: ${product.isOutOfStock}`);
+  return product;
+};
+
 app.put('/api/admin/products/:id', authMiddleware, adminMiddleware, async (req: any, res: any) => {
   try {
-    const { priceRange, isOutOfStock, name, localName, category, image } = req.body;
-    const productId = String(req.params.id);
-
-    const product = await Product.findOneAndUpdate(
-      { $or: [{ id: productId }, { _id: mongoose.Types.ObjectId.isValid(productId) ? productId : null }] },
-      {
-        $set: {
-          id: productId,
-          ...(priceRange !== undefined && { priceRange }),
-          ...(isOutOfStock !== undefined && { isOutOfStock }),
-          ...(name && { name }),
-          ...(localName && { localName }),
-          ...(category && { category }),
-          ...(image && { image })
-        }
-      },
-      { new: true, upsert: true }
-    );
-    invalidateProductCache();
+    const product = await updateProductInDb(req.params.id, req.body);
     res.json(product);
   } catch (error) {
     console.error("[Product Update Error]", error);
@@ -407,24 +442,12 @@ app.put('/api/admin/products/:id', authMiddleware, adminMiddleware, async (req: 
 
 app.post('/api/products/update-stock', async (req: any, res: any) => {
   try {
-    const { id, priceRange, isOutOfStock } = req.body;
-    if (!id) return res.status(400).json({ error: 'Product ID required' });
-    const productId = String(id);
-
-    const product = await Product.findOneAndUpdate(
-      { $or: [{ id: productId }, { _id: mongoose.Types.ObjectId.isValid(productId) ? productId : null }] },
-      {
-        $set: {
-          id: productId,
-          ...(priceRange !== undefined && { priceRange }),
-          ...(isOutOfStock !== undefined && { isOutOfStock })
-        }
-      },
-      { new: true, upsert: true }
-    );
-    invalidateProductCache();
+    const productId = req.body.id || req.body.productId;
+    if (!productId) return res.status(400).json({ error: 'Product ID required' });
+    const product = await updateProductInDb(productId, req.body);
     res.json(product);
   } catch (error) {
+    console.error("[Stock Update Error]", error);
     res.status(500).json({ error: 'Stock update failed' });
   }
 });
