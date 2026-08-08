@@ -13,7 +13,7 @@
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('sw.js', { scope: '/admin/' }).catch(err => console.log('SW reg error:', err));
+          navigator.serviceWorker.register('sw.js', { scope: '/' }).catch(err => console.log('SW reg error:', err));
         });
       }
     </script>

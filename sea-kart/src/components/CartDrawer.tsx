@@ -107,6 +107,9 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
           paymentMethod: paymentMethodUsed,
           deliverySlot: selectedSlot,
           address: deliveryAddress.trim(),
+          userName: user?.name || 'Customer',
+          userEmail: user?.email || '',
+          userPhone: user?.phone || '',
         }),
       });
       if (!res.ok) throw new Error('Order creation failed');

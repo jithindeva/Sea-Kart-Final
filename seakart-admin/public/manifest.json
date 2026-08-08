@@ -1,5 +1,5 @@
 {
-  "id": "/admin/",
+  "id": "/",
   "short_name": "SeaKart Admin",
   "name": "Sea Kart Admin Portal",
   "description": "Manage orders, inventory stock, pricing, and customer accounts for Sea Kart.",

@@ -1,29 +1,42 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Mail, Waves } from 'lucide-react';
+import { Mail, Waves, Lock, Eye, EyeOff } from 'lucide-react';
 import { useNavigate, Navigate } from 'react-router-dom';
-
+import { getApiBase } from '../config/api';
 
 export default function Login() {
   const { user, login } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState('seakart019@gmail.com');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    // Auto-ping backend on page mount so Render free tier wakes up immediately
+    const apiBase = getApiBase();
+    fetch(`${apiBase}/api/products`).catch(() => {});
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
     const cleanEmail = email.trim().toLowerCase();
+    const cleanPass = password.trim();
     if (!cleanEmail) {
       setError('Please enter an admin email.');
+      return;
+    }
+    if (!cleanPass) {
+      setError('Please enter the admin password.');
       return;
     }
 
     setLoading(true);
     try {
-      await login(cleanEmail, ''); // Empty password since it was removed
+      await login(cleanEmail, cleanPass);
       navigate('/');
     } catch (err: any) {
       setError(err.response?.data?.error || err.message || 'Login failed');
@@ -177,7 +190,7 @@ export default function Login() {
             {/* Email field */}
             <div>
               <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'rgba(148,163,184,0.9)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Admin Google Email
+                Admin Email
               </label>
               <div style={{ position: 'relative' }}>
                 <Mail style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', width: 16, height: 16, color: 'rgba(148,163,184,0.5)' }} />
@@ -191,6 +204,38 @@ export default function Login() {
                   placeholder="seakart019@gmail.com"
                   autoComplete="email"
                 />
+              </div>
+            </div>
+
+            {/* Password field */}
+            <div>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'rgba(148,163,184,0.9)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Master Password
+              </label>
+              <div style={{ position: 'relative' }}>
+                <Lock style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', width: 16, height: 16, color: 'rgba(148,163,184,0.5)' }} />
+                <input
+                  id="admin-password"
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  className="input-field"
+                  placeholder="Enter admin password (e.g. seakart123)"
+                  autoComplete="current-password"
+                  style={{ paddingRight: '44px' }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(v => !v)}
+                  style={{
+                    position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
+                    background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
+                    color: 'rgba(148,163,184,0.5)', transition: 'color 0.2s', display: 'flex', alignItems: 'center'
+                  }}
+                >
+                  {showPassword ? <EyeOff style={{ width: 16, height: 16 }} /> : <Eye style={{ width: 16, height: 16 }} />}
+                </button>
               </div>
             </div>
 

@@ -47,45 +47,14 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         console.log('Google profile:', profile);
         
         if (profile && profile.email) {
-          // Use Vite proxy on localhost (empty base = same origin, Vite forwards /api/* to port 5000)
-          // On production use the Render backend URL
-          const envUrl = (import.meta.env as any).VITE_API_URL;
-          let apiBase = '';
-          if (envUrl && envUrl.trim() !== '') {
-            apiBase = envUrl.trim().replace(/\/$/, '');
-          } else if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-            apiBase = 'https://sea-kart-final.onrender.com';
-          }
-          // On localhost: apiBase stays '' so Vite proxy handles /api/* -> port 5000
-
-          // Send email + name to backend
-          const backendRes = await fetch(`${apiBase}/api/auth/google`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              email: profile.email.trim().toLowerCase(),
-              name: profile.name || profile.email.split('@')[0],
-              avatar: profile.picture || '',
-              phone: ''
-            }),
-          });
-
-          if (!backendRes.ok) {
-            const errData = await backendRes.json().catch(() => ({}));
-            throw new Error(errData.error || `Backend error: ${backendRes.status}`);
-          }
-
-          const data = await backendRes.json();
-          
-          // Save auth token and user profile to localStorage
-          localStorage.setItem('sk_token', data.token);
-          localStorage.setItem('sk_user_profile', JSON.stringify(data.user));
-          
-          toast.success(`Welcome ${data.user?.name || profile.name || profile.email}! Signed in with Google.`);
+          await googleLogin(
+            profile.email,
+            profile.name || profile.email.split('@')[0],
+            profile.picture || '',
+            ''
+          );
           document.body.style.overflow = 'unset';
           onClose();
-          // Reload to update user state
-          window.location.href = '/';
         } else {
           toast.error('Google did not return an email. Please try again.');
         }

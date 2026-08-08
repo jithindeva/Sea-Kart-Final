@@ -21,6 +21,8 @@ export const useProducts = () => {
   return useQuery({
     queryKey: ['products'],
     queryFn: fetchProducts,
+    refetchInterval: 3000,
+    staleTime: 0,
   });
 };
 

@@ -18,7 +18,7 @@ interface UserContextType {
   isLoggedIn: boolean;
   login: (email: string, pass: string, phone?: string) => Promise<void>;
   register: (name: string, email: string, pass: string, phone?: string) => Promise<void>;
-  googleLogin: (email: string, phone: string) => Promise<void>;
+  googleLogin: (email: string, name?: string, avatar?: string, phone?: string) => Promise<void>;
   updateUser: (updates: Partial<UserProfile>) => Promise<void>;
   logout: () => void;
   token: string | null;
@@ -119,17 +119,17 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     toast.success("Account created successfully!");
   };
 
-  const googleLogin = async (email: string, phone: string = '') => {
+  const googleLogin = async (email: string, name: string = '', avatar: string = '', phone: string = '') => {
     const cleanEmail = email.trim().toLowerCase();
     const res = await fetchWithTimeout(`${getApiBase()}/api/auth/google`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: cleanEmail, phone })
+      body: JSON.stringify({ email: cleanEmail, name, avatar, phone })
     });
     const data = await parseJsonResponse(res);
     if (!res.ok) throw new Error(data.error || 'Google login failed');
     saveAuth(data.token, data.user);
-    toast.success("Logged in with Google!");
+    toast.success(`Welcome ${data.user?.name || cleanEmail}! Signed in with Google.`);
   };
 
   const updateUser = async (updates: Partial<UserProfile>) => {

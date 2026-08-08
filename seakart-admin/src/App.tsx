@@ -25,7 +25,7 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <BrowserRouter basename="/admin">
+        <BrowserRouter>
           <Routes>
             <Route path="/login" element={<AdminContent />} />
             <Route path="/" element={<AdminContent />} />
