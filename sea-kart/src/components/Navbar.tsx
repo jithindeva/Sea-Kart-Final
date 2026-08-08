@@ -181,13 +181,12 @@ const Navbar = () => {
           <div className="flex items-center gap-3">
             {isLoggedIn ? (
               <div className="flex items-center gap-2">
-                {/* Dashboard Button - visible on desktop */}
+                {/* Dashboard Button - same style as nav links */}
                 <Link
                   to="/dashboard"
                   onClick={() => setActiveNav('dashboard')}
-                  className="hidden md:flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-4 py-2 rounded-full shadow-md shadow-blue-500/20 transition-all active:scale-95"
+                  className={`hidden md:block ${getNavClass('dashboard')}`}
                 >
-                  <LayoutDashboard className="w-4 h-4" />
                   Dashboard
                 </Link>
 
