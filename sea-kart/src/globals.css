@@ -98,9 +98,7 @@
 
   body {
     @apply bg-background text-foreground;
-    /* Prevent CLS from scrollbar appearing/disappearing */
-    overflow-y: scroll;
-    /* Hardware-accelerated smooth scrolling on Android WebView */
+    /* Smooth GPU-backed scrolling on Android WebView */
     -webkit-overflow-scrolling: touch;
     /* Prevent over-scroll bounce causing layout recalc */
     overscroll-behavior-y: contain;

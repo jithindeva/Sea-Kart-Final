@@ -1,5 +1,5 @@
-// SeaKart Service Worker - v3.0 (Smooth Performance & Mobile UX)
-const CACHE_NAME = 'seakart-v3.0';
+// SeaKart Service Worker
+const CACHE_NAME = 'seakart-v3.1';
 
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {

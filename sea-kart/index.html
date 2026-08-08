@@ -11,6 +11,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>Sea Kart</title>
     <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
     <meta name="theme-color" content="#2563eb" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
@@ -29,8 +30,8 @@
       }
     </script>
     <script>
-      // Installed PWA App Auto-Updater (v2.0.3)
-      const CURRENT_APP_VERSION = '2.0.4-smooth-perf';
+      // Installed PWA App Auto-Updater
+      const CURRENT_APP_VERSION = '2.0.5-update';
       const storedVersion = localStorage.getItem('seakart_app_version');
 
       if (storedVersion !== CURRENT_APP_VERSION) {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, ShieldCheck, Lock } from 'lucide-react';
 import { useGoogleLogin } from '@react-oauth/google';
+import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { useUser } from '@/context/UserContext';
 import { toast } from 'sonner';
@@ -12,23 +13,19 @@ interface AuthModalProps {
 
 const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   const { googleLogin } = useUser();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const googleBtnRef = useRef<HTMLButtonElement>(null);
 
-  // Whenever modal opens on mobile, scroll the Google button into center view instantly
   useEffect(() => {
     if (isOpen) {
-      // Short delay to allow the modal DOM to render before scrolling
-      const timer = setTimeout(() => {
-        if (googleBtnRef.current) {
-          googleBtnRef.current.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center',
-          });
-        }
-      }, 120);
-      return () => clearTimeout(timer);
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
     }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
   }, [isOpen]);
 
   // Live Official Google OAuth Popup trigger - STRICT VERIFICATION ONLY
@@ -46,6 +43,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           await googleLogin(profile.email, '');
           toast.success(`Welcome ${profile.name || profile.email}! Verified by Google.`);
           onClose();
+          navigate('/');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         } else {
           toast.error('Google verification failed. Unverified account.');
         }
@@ -66,10 +65,38 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md"
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100%',
+        height: '100%',
+        zIndex: 99999,
+        background: 'rgba(0,0,0,0.65)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '16px',
+        boxSizing: 'border-box',
+      }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="bg-white rounded-3xl p-8 w-full max-w-md relative shadow-2xl border border-slate-100 animate-in fade-in zoom-in duration-200 mx-4">
+      <div
+        style={{
+          background: '#ffffff',
+          borderRadius: '24px',
+          padding: '32px',
+          width: '100%',
+          maxWidth: '400px',
+          position: 'relative',
+          boxShadow: '0 25px 60px rgba(0,0,0,0.35)',
+          border: '1px solid rgba(0,0,0,0.08)',
+        }}
+      >
         <button 
           onClick={onClose}
           className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
