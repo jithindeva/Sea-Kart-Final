@@ -18,7 +18,7 @@ import UpdateNotification from "./components/UpdateNotification";
 import { ThemeProvider } from "./components/ThemeProvider";
 
 const queryClient = new QueryClient();
-const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "DEMO_GOOGLE_CLIENT_ID";
+const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "601037691840-g3hdfueb4ppheghpni22vn4abgfod6ih.apps.googleusercontent.com";
 
 // Helper component for session management
 const AppSessionManager = () => {
