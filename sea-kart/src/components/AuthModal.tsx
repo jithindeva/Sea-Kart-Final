@@ -46,12 +46,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           // Fix for Android/Mobile: Remove the scroll lock immediately before scrolling
           document.body.style.overflow = 'unset';
           onClose();
-          navigate('/');
-          
-          // Small delay to ensure the DOM has updated and is ready to scroll
-          setTimeout(() => {
-            window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-          }, 100);
+          // Hard redirect to ensure Android resets scroll position and starts fresh from home
+          window.location.href = '/';
         } else {
           toast.error('Google verification failed. Unverified account.');
         }
