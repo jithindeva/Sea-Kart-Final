@@ -30,8 +30,8 @@
       }
     </script>
     <script>
-      // Installed PWA App Auto-Updater
-      const CURRENT_APP_VERSION = '2.0.8-update';
+      // Installed PWA App Auto-Updater - Force fresh cache clearing on mobile phones
+      const CURRENT_APP_VERSION = '3.0.0-live-force';
       const storedVersion = localStorage.getItem('seakart_app_version');
 
       if (storedVersion !== CURRENT_APP_VERSION) {
@@ -41,7 +41,11 @@
             for (let name of names) caches.delete(name);
           });
         }
-        window.location.reload(true);
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(regs => {
+            for (let reg of regs) reg.update();
+          });
+        }
       }
     </script>
     <script type="module" src="/src/main.tsx"></script>
