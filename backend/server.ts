@@ -939,6 +939,10 @@ app.get('/api/orders/:id/location', (req, res) => {
   }
 });
 
-app.listen(Number(PORT), '0.0.0.0', () => {
-  console.log(`Server running on port ${PORT}`);
-});
+if (process.env.VERCEL !== '1' && process.env.NODE_ENV !== 'test') {
+  app.listen(Number(PORT), '0.0.0.0', () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
+
+export default app;
