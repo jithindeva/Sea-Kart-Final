@@ -60,7 +60,8 @@ const Navbar = () => {
   };
 
   const handleLoginClick = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Use 'auto' instead of 'smooth' to instantly jump to top before AuthModal locks the scroll
+    window.scrollTo({ top: 0, behavior: 'auto' });
     setIsOpen(false);
     setIsAuthOpen(true);
   };
