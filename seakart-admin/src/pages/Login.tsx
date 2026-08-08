@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Eye, EyeOff, Mail, Lock, Waves } from 'lucide-react';
+import { Mail, Waves } from 'lucide-react';
 import { useNavigate, Navigate } from 'react-router-dom';
 
 
@@ -8,8 +8,6 @@ export default function Login() {
   const { user, login } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -25,7 +23,7 @@ export default function Login() {
 
     setLoading(true);
     try {
-      await login(cleanEmail, password);
+      await login(cleanEmail, ''); // Empty password since it was removed
       navigate('/');
     } catch (err: any) {
       setError(err.response?.data?.error || err.message || 'Login failed');
