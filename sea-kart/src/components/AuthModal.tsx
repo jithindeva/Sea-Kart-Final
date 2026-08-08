@@ -47,8 +47,18 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         console.log('Google profile:', profile);
         
         if (profile && profile.email) {
+          // Determine API base URL (same logic as UserContext)
+          const envUrl = (import.meta.env as any).VITE_API_URL;
+          let apiBase = '';
+          if (envUrl && envUrl.trim() !== '') {
+            apiBase = envUrl.trim().replace(/\/$/, '');
+          } else if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+            apiBase = 'https://sea-kart-final.onrender.com';
+          } else {
+            apiBase = 'http://localhost:5000';
+          }
+
           // Send email + name to backend
-          const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:5000';
           const backendRes = await fetch(`${apiBase}/api/auth/google`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
