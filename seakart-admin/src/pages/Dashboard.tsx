@@ -143,24 +143,43 @@ export default function Dashboard() {
     retry: 3
   });
   const [productOverrides, setProductOverrides] = useState<Record<string, { priceRange?: string; isOutOfStock?: boolean }>>({});
-
-  const updateProductMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: string, data: any }) => {
-      return (await api.put(`/admin/products/${id}`, data)).data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminProducts'] });
-      queryClient.invalidateQueries({ queryKey: ['products'] });
-    }
-  });
+  const [savingId, setSavingId] = useState<string | null>(null);
+  const [saveSuccessMsg, setSaveSuccessMsg] = useState<string | null>(null);
 
   const handleProductUpdate = (id: string, updates: { priceRange?: string; isOutOfStock?: boolean }) => {
     setProductOverrides(prev => ({
       ...prev,
       [id]: { ...(prev[id] || {}), ...updates }
     }));
-    updateProductMutation.mutate({ id, data: updates });
-    api.post('/products/update-stock', { id, ...updates }).catch(() => {});
+  };
+
+  const saveSingleProduct = async (product: any) => {
+    const currentOverride = productOverrides[product.id] || {};
+    const finalPrice = currentOverride.priceRange !== undefined ? currentOverride.priceRange : product.priceRange;
+    const finalStock = currentOverride.isOutOfStock !== undefined ? currentOverride.isOutOfStock : product.isOutOfStock;
+
+    setSavingId(product.id);
+    try {
+      const payload = {
+        id: product.id,
+        name: product.name,
+        priceRange: finalPrice,
+        isOutOfStock: finalStock
+      };
+      await api.put(`/admin/products/${product.id}`, payload);
+      await api.post('/products/update-stock', payload);
+      
+      queryClient.invalidateQueries({ queryKey: ['adminProducts'] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+
+      setSaveSuccessMsg(`✓ Saved ${product.name} (${finalPrice})! Live on user website now.`);
+      setTimeout(() => setSaveSuccessMsg(null), 4500);
+    } catch (err) {
+      console.error("Save product error:", err);
+      alert("Failed to save product to cloud. Please check your internet connection.");
+    } finally {
+      setSavingId(null);
+    }
   };
 
   const rawProducts = (productsResponse?.data && productsResponse.data.length > 0) ? productsResponse.data : INITIAL_CATALOG;
@@ -763,6 +782,18 @@ export default function Dashboard() {
         {/* ── PRODUCTS TAB ── */}
         {activeTab === 'products' && (
           <div className="tab-animate">
+            {saveSuccessMsg && (
+              <div style={{
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                color: 'white', padding: '12px 20px', borderRadius: '14px',
+                marginBottom: '16px', fontWeight: 700, fontSize: '13px',
+                display: 'flex', alignItems: 'center', gap: '10px',
+                boxShadow: '0 6px 20px rgba(16,185,129,0.3)'
+              }}>
+                <span style={{ fontSize: '16px' }}>💾</span>
+                <span>{saveSuccessMsg}</span>
+              </div>
+            )}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
               {loadingProducts ? (
                 <div style={{ gridColumn: '1/-1', padding: '60px', display: 'flex', justifyContent: 'center' }}>
@@ -823,13 +854,27 @@ export default function Dashboard() {
                         <button
                           onClick={() => handleProductUpdate(product.id, { priceRange: product.priceRange, isOutOfStock: !product.isOutOfStock })}
                           style={{
-                            padding: '6px', borderRadius: '8px', border: 'none', cursor: 'pointer',
-                            fontSize: '11px', fontWeight: 700,
+                            padding: '8px', borderRadius: '8px', border: 'none', cursor: 'pointer',
+                            fontSize: '12px', fontWeight: 700,
                             background: product.isOutOfStock ? 'rgba(239,68,68,0.15)' : 'rgba(16,185,129,0.15)',
                             color: product.isOutOfStock ? '#f87171' : '#34d399'
                           }}
                         >
                           {product.isOutOfStock ? '✕ Out of Stock' : '✓ In Stock'}
+                        </button>
+                        <button
+                          onClick={() => saveSingleProduct(product)}
+                          disabled={savingId === product.id}
+                          style={{
+                            padding: '9px 12px', borderRadius: '10px', border: 'none', cursor: 'pointer',
+                            fontSize: '12px', fontWeight: 800, color: 'white',
+                            background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+                            boxShadow: '0 4px 14px rgba(37,99,235,0.35)',
+                            display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                            opacity: savingId === product.id ? 0.7 : 1, transition: 'all 0.18s'
+                          }}
+                        >
+                          {savingId === product.id ? '⏳ Saving...' : '💾 Save to Website'}
                         </button>
                       </div>
                     </div>
