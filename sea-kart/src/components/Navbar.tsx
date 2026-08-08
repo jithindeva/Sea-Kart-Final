@@ -73,7 +73,12 @@ const Navbar = () => {
   }, []);
 
   const handleLogout = () => {
-    setIsLogoutModalOpen(true);
+    setIsDropdownOpen(false);
+    // Scroll to the bottom of the page smoothly so user can see the logout confirmation
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    setTimeout(() => {
+      setIsLogoutModalOpen(true);
+    }, 400);
   };
 
   const confirmLogout = () => {
@@ -178,14 +183,10 @@ const Navbar = () => {
                 {/* Avatar Button */}
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-all group"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
                 >
-                  <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-md overflow-hidden border-2 border-blue-400">
-                    {user?.avatar ? (
-                      <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <span>{(user?.name || 'U')[0].toUpperCase()}</span>
-                    )}
+                  <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-md border-2 border-blue-400">
+                    <span>{(user?.name || 'U')[0].toUpperCase()}</span>
                   </div>
                   <span className="hidden md:block text-sm font-semibold text-slate-700 dark:text-slate-200 max-w-[100px] truncate">{user?.name || 'Account'}</span>
                   <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
@@ -197,12 +198,8 @@ const Navbar = () => {
                     {/* Profile Header */}
                     <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-800 border-b border-slate-200 dark:border-slate-700">
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-lg overflow-hidden border-2 border-blue-400 shadow-md">
-                          {user?.avatar ? (
-                            <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
-                          ) : (
-                            <span>{(user?.name || 'U')[0].toUpperCase()}</span>
-                          )}
+                        <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-lg border-2 border-blue-400 shadow-md">
+                          <span>{(user?.name || 'U')[0].toUpperCase()}</span>
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="font-bold text-slate-900 dark:text-white text-sm truncate">{user?.name || 'User'}</p>
