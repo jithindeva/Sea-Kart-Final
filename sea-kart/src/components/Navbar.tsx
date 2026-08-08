@@ -180,7 +180,19 @@ const Navbar = () => {
 
           <div className="flex items-center gap-3">
             {isLoggedIn ? (
-              <div className="relative" ref={dropdownRef}>
+              <div className="flex items-center gap-2">
+                {/* Dashboard Button - visible on desktop */}
+                <Link
+                  to="/dashboard"
+                  onClick={() => setActiveNav('dashboard')}
+                  className="hidden md:flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-4 py-2 rounded-full shadow-md shadow-blue-500/20 transition-all active:scale-95"
+                >
+                  <LayoutDashboard className="w-4 h-4" />
+                  Dashboard
+                </Link>
+
+                {/* Avatar Dropdown */}
+                <div className="relative" ref={dropdownRef}>
                 {/* Avatar Button */}
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -230,6 +242,7 @@ const Navbar = () => {
                     </div>
                   </div>
                 )}
+              </div>
               </div>
             ) : (
               <Button 
