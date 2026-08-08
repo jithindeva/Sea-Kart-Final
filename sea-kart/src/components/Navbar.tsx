@@ -74,7 +74,12 @@ const Navbar = () => {
 
   const handleLogout = () => {
     setIsDropdownOpen(false);
-    setIsLogoutModalOpen(true);
+    // Scroll to center of page so modal appears nicely in view
+    const midPoint = (document.body.scrollHeight - window.innerHeight) / 2;
+    window.scrollTo({ top: midPoint, behavior: 'smooth' });
+    setTimeout(() => {
+      setIsLogoutModalOpen(true);
+    }, 500);
   };
 
   const confirmLogout = () => {
