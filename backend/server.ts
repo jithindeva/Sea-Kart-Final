@@ -457,32 +457,40 @@ app.post('/api/auth/reset-password', async (req, res) => {
 
 app.post('/api/auth/google', async (req, res) => {
   try {
-    const { email, phone } = req.body;
+    const { email, phone, name, avatar } = req.body;
     const cleanEmail = (email || '').trim().toLowerCase();
     if (!cleanEmail) return res.status(400).json({ error: 'Email is required' });
     
     let user = await User.findOne({ email: cleanEmail });
     const cleanPhone = (phone && isValidPhone(phone)) ? phone : '';
+    const googleName = (name || cleanEmail.split('@')[0]).trim();
+    const googleAvatar = avatar || 'https://lh3.googleusercontent.com/a/ACg8ocLF-V0_1U6Fj7';
     
     if (!user) {
-      // Create mock google user
+      // Create new Google user with real name and avatar from Google
       const hashedPassword = await bcrypt.hash('google_mock_password_' + Date.now(), 10);
       user = new User({ 
-        name: cleanEmail.split('@')[0], 
+        name: googleName, 
         email: cleanEmail, 
         password: hashedPassword,
         phone: cleanPhone,
-        avatar: 'https://lh3.googleusercontent.com/a/ACg8ocLF-V0_1U6Fj7'
+        avatar: googleAvatar
       });
       await user.save();
-    } else if (cleanPhone) {
-      user.phone = cleanPhone;
-      await user.save();
+    } else {
+      // Update existing user's name/avatar from Google if not already set
+      let changed = false;
+      if (cleanPhone && !user.phone) { user.phone = cleanPhone; changed = true; }
+      if (googleAvatar && !user.avatar?.includes('googleusercontent')) { 
+        user.avatar = googleAvatar; changed = true; 
+      }
+      if (changed) await user.save();
     }
     
     const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '7d' });
     res.json({ token, user: { name: user.name, email: user.email, phone: user.phone, address: user.address, avatar: user.avatar, wishlist: user.wishlist, isAdmin: user.isAdmin } });
   } catch (error) {
+    console.error('Google login backend error:', error);
     res.status(500).json({ error: 'Google Login failed' });
   }
 });

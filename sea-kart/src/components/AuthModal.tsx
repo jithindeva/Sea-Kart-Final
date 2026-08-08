@@ -34,30 +34,61 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     onSuccess: async (tokenResponse) => {
       setLoading(true);
       try {
+        // Fetch user profile from Google
         const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
           headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
         });
+
+        if (!res.ok) {
+          throw new Error(`Google userinfo fetch failed: ${res.status}`);
+        }
+
         const profile = await res.json();
+        console.log('Google profile:', profile);
         
         if (profile && profile.email) {
-          await googleLogin(profile.email, '');
-          toast.success(`Welcome ${profile.name || profile.email}! Verified by Google.`);
+          // Send email + name to backend
+          const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:5000';
+          const backendRes = await fetch(`${apiBase}/api/auth/google`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              email: profile.email.trim().toLowerCase(),
+              name: profile.name || profile.email.split('@')[0],
+              avatar: profile.picture || '',
+              phone: ''
+            }),
+          });
+
+          if (!backendRes.ok) {
+            const errData = await backendRes.json().catch(() => ({}));
+            throw new Error(errData.error || `Backend error: ${backendRes.status}`);
+          }
+
+          const data = await backendRes.json();
           
+          // Save auth token and user profile to localStorage
+          localStorage.setItem('sk_token', data.token);
+          localStorage.setItem('sk_user_profile', JSON.stringify(data.user));
+          
+          toast.success(`Welcome ${data.user?.name || profile.name || profile.email}! Signed in with Google.`);
           document.body.style.overflow = 'unset';
           onClose();
+          // Reload to update user state
           window.location.href = '/';
         } else {
-          toast.error('Google verification failed. Unverified account.');
+          toast.error('Google did not return an email. Please try again.');
         }
       } catch (err: any) {
-        toast.error('Google account verification failed.');
+        console.error('Google login error:', err);
+        toast.error(err.message || 'Google sign-in failed. Please try again.');
       } finally {
         setLoading(false);
       }
     },
     onError: (err) => {
-      console.log('Google login error:', err);
-      toast.error('Google Popup blocked. Please allow popups.');
+      console.log('Google popup error:', err);
+      toast.error('Google sign-in was cancelled or blocked. Please try again.');
       setLoading(false);
     }
   });
